@@ -26,6 +26,8 @@ class CameraScreen extends StatefulWidget {
 
 class _CameraScreenState extends State<CameraScreen>
     with WidgetsBindingObserver {
+  static const _orientationRestartDelay = Duration(milliseconds: 300);
+
   late final CameraService _cameraService;
 
   _CameraViewState _viewState = _CameraViewState.initializing;
@@ -35,6 +37,8 @@ class _CameraScreenState extends State<CameraScreen>
   bool _isInitializing = false;
   int _requestId = 0;
   Future<void>? _pauseOperation;
+  Orientation? _lastOrientation;
+  Timer? _orientationRestartTimer;
 
   @override
   void initState() {
@@ -42,6 +46,18 @@ class _CameraScreenState extends State<CameraScreen>
     _cameraService = widget.cameraService ?? DeviceCameraService();
     WidgetsBinding.instance.addObserver(this);
     unawaited(_initializeCamera());
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final orientation = MediaQuery.orientationOf(context);
+    final previousOrientation = _lastOrientation;
+    _lastOrientation = orientation;
+
+    if (previousOrientation != null && previousOrientation != orientation) {
+      _scheduleOrientationRestart();
+    }
   }
 
   @override
@@ -62,13 +78,16 @@ class _CameraScreenState extends State<CameraScreen>
       case AppLifecycleState.detached:
         if (_isAppActive) {
           _isAppActive = false;
+          _orientationRestartTimer?.cancel();
           _pauseOperation = _pauseCamera();
         }
         return;
     }
   }
 
-  Future<void> _initializeCamera() async {
+  Future<void> _initializeCamera({
+    String startingMessage = 'Starting the front camera…',
+  }) async {
     if (_isInitializing || !_isAppActive) {
       return;
     }
@@ -79,7 +98,7 @@ class _CameraScreenState extends State<CameraScreen>
       setState(() {
         _viewState = _CameraViewState.initializing;
         _controller = null;
-        _statusMessage = 'Starting the front camera…';
+        _statusMessage = startingMessage;
       });
     }
 
@@ -115,6 +134,39 @@ class _CameraScreenState extends State<CameraScreen>
     });
   }
 
+  void _scheduleOrientationRestart() {
+    _orientationRestartTimer?.cancel();
+    if (!_isAppActive) {
+      return;
+    }
+
+    _orientationRestartTimer = Timer(_orientationRestartDelay, () {
+      _orientationRestartTimer = null;
+      if (mounted && _isAppActive) {
+        unawaited(_restartCameraForOrientationChange());
+      }
+    });
+  }
+
+  Future<void> _restartCameraForOrientationChange() async {
+    final restartId = ++_requestId;
+    _isInitializing = false;
+    if (mounted) {
+      setState(() {
+        _controller = null;
+        _viewState = _CameraViewState.initializing;
+        _statusMessage = 'Adjusting camera orientation…';
+      });
+    }
+
+    await _cameraService.dispose();
+    if (!mounted || !_isAppActive || restartId != _requestId) {
+      return;
+    }
+
+    await _initializeCamera(startingMessage: 'Adjusting camera orientation…');
+  }
+
   Future<void> _pauseCamera() async {
     _requestId += 1;
     _isInitializing = false;
@@ -139,6 +191,7 @@ class _CameraScreenState extends State<CameraScreen>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _orientationRestartTimer?.cancel();
     _isAppActive = false;
     _requestId += 1;
     unawaited(_cameraService.dispose());

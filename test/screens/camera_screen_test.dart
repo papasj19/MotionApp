@@ -88,6 +88,63 @@ void main() {
     expect(find.text('Front camera unavailable'), findsOneWidget);
     expect(service.initializeCalls, 2);
   });
+
+  testWidgets('restarts the camera after orientation changes', (tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(400, 800);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetPhysicalSize);
+
+    final service = _FakeCameraService([
+      const CameraSetupResult(
+        status: CameraSetupStatus.noFrontCamera,
+        message: 'No front-facing camera was found on this device.',
+      ),
+    ]);
+
+    await tester.pumpWidget(
+      MaterialApp(home: CameraScreen(cameraService: service)),
+    );
+    await tester.pumpAndSettle();
+
+    tester.view.physicalSize = const Size(800, 400);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pumpAndSettle();
+
+    expect(service.disposeCalls, 1);
+    expect(service.initializeCalls, 2);
+  });
+
+  testWidgets('debounces rapid orientation changes', (tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(400, 800);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetPhysicalSize);
+
+    final service = _FakeCameraService([
+      const CameraSetupResult(
+        status: CameraSetupStatus.noFrontCamera,
+        message: 'No front-facing camera was found on this device.',
+      ),
+    ]);
+
+    await tester.pumpWidget(
+      MaterialApp(home: CameraScreen(cameraService: service)),
+    );
+    await tester.pumpAndSettle();
+
+    tester.view.physicalSize = const Size(800, 400);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    tester.view.physicalSize = const Size(400, 800);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pumpAndSettle();
+
+    expect(service.disposeCalls, 1);
+    expect(service.initializeCalls, 2);
+  });
 }
 
 class _FakeCameraService implements CameraService {
