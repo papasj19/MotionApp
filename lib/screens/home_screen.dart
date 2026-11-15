@@ -1,7 +1,11 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
+
+import 'camera_screen.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, this.cameraScreenBuilder});
+
+  final WidgetBuilder? cameraScreenBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -53,25 +57,22 @@ class HomeScreen extends StatelessWidget {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(
-                            Icons.check_circle,
-                            color: colorScheme.primary,
-                          ),
+                          Icon(Icons.check_circle, color: colorScheme.primary),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Project setup complete',
+                                  'Camera preview ready to test',
                                   style: textTheme.titleMedium?.copyWith(
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
                                 const SizedBox(height: 8),
                                 const Text(
-                                  'Camera and motion tracking are not enabled '
-                                  'yet.',
+                                  'Use the front camera to check positioning. '
+                                  'Motion tracking is not enabled yet.',
                                 ),
                               ],
                             ),
@@ -81,8 +82,22 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 20),
+                  FilledButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder:
+                              cameraScreenBuilder ??
+                              (_) => const CameraScreen(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.videocam_outlined),
+                    label: const Text('Open camera preview'),
+                  ),
+                  const SizedBox(height: 20),
                   const Text(
-                    'No camera data is being captured or stored.',
+                    'Camera video stays in the live preview and is not saved.',
                     textAlign: TextAlign.center,
                   ),
                 ],
