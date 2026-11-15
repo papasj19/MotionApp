@@ -11,6 +11,7 @@ import '../movement_tracking/hand_movement_tracking_adapter.dart';
 import '../movement_tracking/mediapipe_body_movement_tracking_service.dart';
 import '../movement_tracking/movement_tracking_service.dart';
 import '../services/camera_service.dart';
+import '../theme/arcade_theme.dart';
 import '../widgets/calibration_panel.dart';
 import '../widgets/hand_skeleton_overlay.dart';
 
@@ -433,7 +434,8 @@ class _MovementSelectionScreen extends StatelessWidget {
             const Text(
               'A caregiver can choose the clearest option. Calibration measures '
               'the child’s current comfortable movement and never asks for a '
-              'maximum range.',
+              'maximum range. Head control uses left/right tilt only; it does '
+              'not use blinking or facial expressions.',
             ),
             const SizedBox(height: 16),
             for (final type in CalibrationMovementType.values) ...[
@@ -443,10 +445,6 @@ class _MovementSelectionScreen extends StatelessWidget {
               ),
               const SizedBox(height: 12),
             ],
-            const Text(
-              'Head control uses left/right tilt only. It does not use blinking '
-              'or facial expressions.',
-            ),
           ],
         ),
       ),
@@ -467,6 +465,11 @@ class _MovementChoiceCard extends StatelessWidget {
       CalibrationMovementType.wristBend => Icons.pan_tool_alt_outlined,
       CalibrationMovementType.headTilt => Icons.face_outlined,
     };
+    final accent = switch (movementType) {
+      CalibrationMovementType.indexFingerBend => ArcadeColors.electricCyan,
+      CalibrationMovementType.wristBend => ArcadeColors.softPink,
+      CalibrationMovementType.headTilt => ArcadeColors.arcadeYellow,
+    };
     return Semantics(
       button: true,
       label: '${movementType.shortLabel}. ${movementType.selectionDescription}',
@@ -479,7 +482,16 @@ class _MovementChoiceCard extends StatelessWidget {
             padding: const EdgeInsets.all(18),
             child: Row(
               children: [
-                Icon(icon, size: 40),
+                Container(
+                  width: 58,
+                  height: 58,
+                  decoration: BoxDecoration(
+                    color: accent.withValues(alpha: 0.14),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: accent, width: 2),
+                  ),
+                  child: Icon(icon, size: 34, color: accent),
+                ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(
@@ -497,7 +509,11 @@ class _MovementChoiceCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                const Icon(Icons.chevron_right, size: 30),
+                const Icon(
+                  Icons.chevron_right,
+                  size: 30,
+                  color: ArcadeColors.electricCyan,
+                ),
               ],
             ),
           ),

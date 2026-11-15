@@ -4,6 +4,7 @@ import '../calibration/baseline_calibration.dart';
 import '../calibration/calibration_profile.dart';
 import '../calibration/comfortable_movement_calibration.dart';
 import '../movement/movement_measurement.dart';
+import 'joybit_companion.dart';
 
 enum _CalibrationStep {
   ready,
@@ -478,6 +479,12 @@ class _CalibrationPanelState extends State<CalibrationPanel> {
         const SizedBox(height: 6),
         const Text(
           'This calibration is not saved and clears when you leave this screen.',
+        ),
+        const SizedBox(height: 12),
+        const JoybitCompanion(
+          compact: true,
+          message:
+              'Nice job! This setting stays within the movement measured today.',
         ),
         const SizedBox(height: 12),
         OutlinedButton.icon(

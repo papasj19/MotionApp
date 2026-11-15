@@ -1,5 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../theme/arcade_theme.dart';
+import '../widgets/joybit_companion.dart';
 import 'camera_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -26,12 +28,11 @@ class HomeScreen extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.sports_esports,
-                    size: 88,
-                    color: colorScheme.primary,
+                  const JoybitCompanion(
+                    message:
+                        'Hi, I’m Joybit. Let’s find a movement that feels good today.',
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 28),
                   Semantics(
                     header: true,
                     child: Text(
@@ -57,7 +58,11 @@ class HomeScreen extends StatelessWidget {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(Icons.check_circle, color: colorScheme.primary),
+                          const Icon(
+                            Icons.star_rounded,
+                            color: ArcadeColors.arcadeYellow,
+                            size: 30,
+                          ),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Column(
