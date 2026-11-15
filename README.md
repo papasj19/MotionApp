@@ -6,14 +6,15 @@ a simple, reusable game control.
 
 ## Current scope
 
-Stage 4 adds pure-Dart index-finger movement analysis to the on-device hand
-tracking preview. The screen now shows an estimated flexion angle and whether
-the finger is steady, bending or straightening. The existing 21-point skeleton,
-frame-rate and processing-latency diagnostics remain visible.
+Stage 5 is being delivered in small, testable parts. Stage 5A adds an in-memory
+rest/baseline measurement component behind the existing Stage 4 index-finger
+movement diagnostic. It checks for a continuous usable tracking interval and
+estimates the resting value and normal signal variation. There is no unfinished
+calibration screen in the app yet.
 
-The app does not yet calibrate a personal range of motion, create a controller
-signal, recognize a game gesture, run a game, or save a profile. Those remain
-separate later stages.
+The app does not yet ask for a comfortable intentional movement, recommend or
+adjust a threshold, create a controller signal, recognize a game gesture, run a
+game, or save a profile. Those remain separate later stages.
 
 ## Architecture
 
@@ -25,6 +26,8 @@ camera frames -> MediaPipe adapter -> HandObservation -> skeleton overlay
                                       +-> finger movement analyzer
                                                     |
                                                     +-> diagnostic card
+                                                    |
+                                                    +-> baseline session
 ```
 
 `HandObservation` is an app-owned type containing a timestamp, 21 normalized
@@ -71,6 +74,22 @@ visibility/presence values are recorded only when the detector actually
 provides them. They are never invented. The output includes the smoothed and
 raw angles, degrees-per-second velocity, timestamp, validity, signal-quality
 notes and reacquisition state.
+
+## Stage 5A baseline foundation
+
+`BaselineCalibrationSession` keeps only timestamps and the Stage 4 angle; it
+does not retain camera frames or landmarks. A default baseline needs at least
+eight samples spanning two seconds. A tracking interruption or a gap longer
+than 350 ms restarts that stable interval so stale readings are not combined.
+Delayed samples are ignored without erasing valid progress.
+
+The resting baseline is the median angle. Signal noise is estimated with the
+median absolute deviation multiplied by 1.4826, a robust estimate that is less
+affected by an occasional unusual reading. A default estimate above 6 degrees
+is reported as too variable for an automatic setting, but never as a failure by
+the child. These are engineering defaults for the future caregiver workflow,
+not clinical limits. Stage 5B will compare a comfortable intentional movement
+against this noise before recommending any threshold.
 
 ## Hand-tracking technology decision
 
