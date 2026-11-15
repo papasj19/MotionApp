@@ -1,8 +1,9 @@
 # Adaptive Motion Arcade — GUI Architecture and Screen Plan
 
-Status: planning draft based on the hand-drawn screen map reviewed on
-2026-11-15. This document defines navigation and screen responsibilities; it
-does not authorize implementation of later stages.
+Status: approved POC direction with responsive wireframes prepared for review
+on 2026-11-15. School access and the possible third Student Hub action remain
+open until teacher interviews. This document does not authorize implementation
+of later stages.
 
 ## Product structure from the sketch
 
@@ -41,8 +42,7 @@ Arcade Lobby
         ├── Results                           [Stage 10]
         ├── Setup & Play
         │   └── movement/calibration/control-test/game flow
-        └── Quick Start (provisional)
-            └── verify tracking and last setup before choosing a game
+        └── Third action intentionally open pending teacher interviews
 ```
 
 Quick Play and School must share one movement/calibration/controller pipeline.
@@ -130,16 +130,14 @@ Required states:
 
 ### 7. Student Hub
 
-The current three-card idea becomes:
+The current POC contains two understood actions:
 
 - **Results**: physical-signal and game results kept visibly separate.
 - **Setup & Play**: choose/review movement, calibrate, test, and choose a game.
-- **Quick Start** (provisional): reuse the last configuration only after a
-  short camera/tracking check, with an obvious recalibrate option.
 
-Quick Start is the recommended placeholder for the question-mark card, but it
-should be confirmed with teachers. If teacher feedback does not establish a
-valuable third action, ship two cards rather than inventing one.
+The question-mark card is deliberately omitted. Teacher interviews should
+establish whether a third action is useful and what it should do. If they do
+not identify a real need, ship two cards rather than inventing one.
 
 ### 8. Results
 
@@ -168,7 +166,6 @@ Caregiver/teacher-facing:
 
 - Student selection and profile management
 - Calibration review and technical details
-- Quick Start approval/recalibration
 - Results, deletion, export, and settings
 
 The app can share the visual style across both areas, but school screens should
@@ -183,36 +180,41 @@ prioritize information clarity over arcade decoration.
 - Keep Joybit and decoration outside the camera tracking area.
 - Avoid continuous cabinet, character, or background movement. Provide reduced
   motion before game animation is introduced.
-- Preserve text scaling, screen-reader order, high contrast, landscape layout,
-  and a large consistent Back/Home action.
+- Preserve text scaling, screen-reader order, high contrast, responsive
+  portrait/landscape layout, and a large consistent Back/Home action.
 - Confirm before abandoning an in-progress game or unsaved school setup, but do
   not add confirmation to ordinary backward navigation.
 
-## Decisions required before screen implementation
+## Recorded decisions and research holds
 
-1. **Orientation:** decide whether child arcade screens are landscape-only or
-   responsive in both orientations. School lists/results can remain portrait
-   friendly.
-2. **Range meaning:** approve measured comfortable range versus selectable game
-   sensitivity. They must be two separate concepts in code and language.
-3. **Leg tile:** design it now, but decide whether to hide it or label it
-   unavailable until a later leg-tracking stage is approved.
-4. **School entry:** determine whether School needs an adult gate or simple
-   confirmation before profile data can be viewed or changed.
-5. **Third Student Hub card:** validate Quick Start with teachers; otherwise
-   keep only Results and Setup & Play.
-6. **Session ending:** approve the three outcomes: Play Again, Choose Another
-   Game, and Home.
-7. **Wireframes:** review normal, empty, loading, tracking-lost, camera-denied,
-   and large-text versions of every applicable screen before visual polish.
+1. **Approved — responsive layouts:** every screen must adapt to phone and
+   tablet widths in both portrait and landscape. Do not depend on a landscape
+   lock, even though iPad use may provide more space.
+2. **Approved — separate concepts:** measured comfortable range and selectable
+   game/controller sensitivity remain separate in code and language.
+3. **Approved — Leg later:** design the fourth tile now but hide it from the
+   playable POC until leg tracking is implemented and validated.
+4. **Research hold — School entry:** do not choose an adult gate, confirmation,
+   or profile-access method until school interviews clarify the setting.
+5. **Research hold — third Student Hub action:** show only Results and Setup &
+   Play in the POC. Do not implement Quick Start or another placeholder before
+   teacher feedback.
+6. **Approved — session ending:** provide Play Again, Choose Another Game, and
+   Home.
+7. **Prepared for review — wireframes:** the initial set covers the Lobby,
+   movement selection, calibration, Control Test, Game Select, student list,
+   Student Hub, and Results. Later passes must add explicit loading,
+   tracking-lost, camera-denied, empty, and large-text states before visual
+   polish or screen implementation.
 
 ## Implementation order from this plan
 
 ### Before Stage 6
 
-- Approve this navigation map and the seven decisions above.
-- Produce low-detail wireframes for the Lobby, movement tiles, calibration,
-  Control Test, Game Select, student list, Student Hub, and Results.
+- Review the prepared navigation map and low-detail wireframes.
+- Record requested changes without implementing Flutter screens.
+- Extend the approved wireframes with loading, tracking-lost, camera-denied,
+  empty, and large-text states.
 - Define the shared Back/Home behavior and the child/caregiver boundary.
 - Do not build empty School, Results, or game screens just to make navigation
   appear complete.
