@@ -1,4 +1,5 @@
 import 'package:camera/camera.dart';
+import 'package:flutter/foundation.dart';
 
 enum CameraSetupStatus {
   ready,
@@ -39,11 +40,16 @@ CameraDescription? selectFrontCamera(List<CameraDescription> cameras) {
   return null;
 }
 
-class DeviceCameraService implements CameraService {
-  DeviceCameraService({CameraListLoader cameraListLoader = availableCameras})
-    : _cameraListLoader = cameraListLoader;
+ImageFormatGroup cameraImageFormatForPlatform(TargetPlatform platform) {
+  return platform == TargetPlatform.iOS
+      ? ImageFormatGroup.bgra8888
+      : ImageFormatGroup.yuv420;
+}
 
-  final CameraListLoader _cameraListLoader;
+class DeviceCameraService implements CameraService {
+  DeviceCameraService({this.cameraListLoader = availableCameras});
+
+  final CameraListLoader cameraListLoader;
 
   CameraController? _activeController;
   CameraController? _pendingController;
@@ -83,7 +89,7 @@ class DeviceCameraService implements CameraService {
     CameraController? initializingController;
 
     try {
-      final cameras = await _cameraListLoader();
+      final cameras = await cameraListLoader();
       if (operationId != _operationId) {
         return _cancelledResult;
       }
@@ -100,6 +106,7 @@ class DeviceCameraService implements CameraService {
         frontCamera,
         ResolutionPreset.medium,
         enableAudio: false,
+        imageFormatGroup: cameraImageFormatForPlatform(defaultTargetPlatform),
       );
       initializingController = controller;
       _pendingController = controller;

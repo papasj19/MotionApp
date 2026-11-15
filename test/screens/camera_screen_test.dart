@@ -1,5 +1,10 @@
+import 'dart:async';
+
+import 'package:adaptive_motion_arcade/hand_tracking/hand_tracking_service.dart';
+import 'package:adaptive_motion_arcade/hand_tracking/hand_tracking_update.dart';
 import 'package:adaptive_motion_arcade/screens/camera_screen.dart';
 import 'package:adaptive_motion_arcade/services/camera_service.dart';
+import 'package:camera/camera.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -11,9 +16,15 @@ void main() {
         message: 'No front-facing camera was found on this device.',
       ),
     ]);
+    final tracking = _FakeHandTrackingService();
 
     await tester.pumpWidget(
-      MaterialApp(home: CameraScreen(cameraService: service)),
+      MaterialApp(
+        home: CameraScreen(
+          cameraService: service,
+          handTrackingService: tracking,
+        ),
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -26,7 +37,9 @@ void main() {
     expect(service.initializeCalls, 1);
 
     await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
     expect(service.disposeCalls, 1);
+    expect(tracking.disposeCalls, 1);
   });
 
   testWidgets('shows denied permission and retries', (tester) async {
@@ -42,9 +55,15 @@ void main() {
         message: 'The camera could not start. Please try again.',
       ),
     ]);
+    final tracking = _FakeHandTrackingService();
 
     await tester.pumpWidget(
-      MaterialApp(home: CameraScreen(cameraService: service)),
+      MaterialApp(
+        home: CameraScreen(
+          cameraService: service,
+          handTrackingService: tracking,
+        ),
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -71,9 +90,15 @@ void main() {
         message: 'No front-facing camera was found on this device.',
       ),
     ]);
+    final tracking = _FakeHandTrackingService();
 
     await tester.pumpWidget(
-      MaterialApp(home: CameraScreen(cameraService: service)),
+      MaterialApp(
+        home: CameraScreen(
+          cameraService: service,
+          handTrackingService: tracking,
+        ),
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -81,6 +106,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(service.disposeCalls, 1);
+    expect(tracking.stopCalls, 1);
 
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await tester.pumpAndSettle();
@@ -101,9 +127,15 @@ void main() {
         message: 'No front-facing camera was found on this device.',
       ),
     ]);
+    final tracking = _FakeHandTrackingService();
 
     await tester.pumpWidget(
-      MaterialApp(home: CameraScreen(cameraService: service)),
+      MaterialApp(
+        home: CameraScreen(
+          cameraService: service,
+          handTrackingService: tracking,
+        ),
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -113,6 +145,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(service.disposeCalls, 1);
+    expect(tracking.stopCalls, 1);
     expect(service.initializeCalls, 2);
   });
 
@@ -128,9 +161,15 @@ void main() {
         message: 'No front-facing camera was found on this device.',
       ),
     ]);
+    final tracking = _FakeHandTrackingService();
 
     await tester.pumpWidget(
-      MaterialApp(home: CameraScreen(cameraService: service)),
+      MaterialApp(
+        home: CameraScreen(
+          cameraService: service,
+          handTrackingService: tracking,
+        ),
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -143,8 +182,38 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(service.disposeCalls, 1);
+    expect(tracking.stopCalls, 1);
     expect(service.initializeCalls, 2);
   });
+}
+
+class _FakeHandTrackingService implements HandTrackingService {
+  final StreamController<HandTrackingUpdate> _updates =
+      StreamController<HandTrackingUpdate>.broadcast();
+
+  int startCalls = 0;
+  int stopCalls = 0;
+  int disposeCalls = 0;
+
+  @override
+  Stream<HandTrackingUpdate> get updates => _updates.stream;
+
+  @override
+  Future<void> start(CameraController controller) async {
+    startCalls += 1;
+  }
+
+  @override
+  Future<void> stop() async {
+    stopCalls += 1;
+    _updates.add(const HandTrackingUpdate.idle());
+  }
+
+  @override
+  Future<void> dispose() async {
+    disposeCalls += 1;
+    await _updates.close();
+  }
 }
 
 class _FakeCameraService implements CameraService {

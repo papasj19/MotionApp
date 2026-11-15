@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:adaptive_motion_arcade/services/camera_service.dart';
 import 'package:camera/camera.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -28,6 +29,17 @@ void main() {
     );
 
     expect(selectFrontCamera([backCamera]), isNull);
+  });
+
+  test('camera stream uses BGRA on iOS and YUV420 on Android', () {
+    expect(
+      cameraImageFormatForPlatform(TargetPlatform.iOS),
+      ImageFormatGroup.bgra8888,
+    );
+    expect(
+      cameraImageFormatForPlatform(TargetPlatform.android),
+      ImageFormatGroup.yuv420,
+    );
   });
 
   test('initialize shares an in-progress camera lookup', () async {

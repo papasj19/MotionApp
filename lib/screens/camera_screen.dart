@@ -3,7 +3,11 @@ import 'dart:async';
 import 'package:camera/camera.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../hand_tracking/hand_tracking_service.dart';
+import '../hand_tracking/hand_tracking_update.dart';
+import '../hand_tracking/mediapipe_hand_tracking_service.dart';
 import '../services/camera_service.dart';
+import '../widgets/hand_skeleton_overlay.dart';
 
 enum _CameraViewState {
   initializing,
@@ -16,9 +20,10 @@ enum _CameraViewState {
 }
 
 class CameraScreen extends StatefulWidget {
-  const CameraScreen({super.key, this.cameraService});
+  const CameraScreen({super.key, this.cameraService, this.handTrackingService});
 
   final CameraService? cameraService;
+  final HandTrackingService? handTrackingService;
 
   @override
   State<CameraScreen> createState() => _CameraScreenState();
@@ -29,8 +34,11 @@ class _CameraScreenState extends State<CameraScreen>
   static const _orientationRestartDelay = Duration(milliseconds: 300);
 
   late final CameraService _cameraService;
+  late final HandTrackingService _handTrackingService;
+  StreamSubscription<HandTrackingUpdate>? _handTrackingSubscription;
 
   _CameraViewState _viewState = _CameraViewState.initializing;
+  HandTrackingUpdate _handTrackingUpdate = const HandTrackingUpdate.idle();
   CameraController? _controller;
   String _statusMessage = 'Starting the front camera…';
   bool _isAppActive = true;
@@ -44,6 +52,13 @@ class _CameraScreenState extends State<CameraScreen>
   void initState() {
     super.initState();
     _cameraService = widget.cameraService ?? DeviceCameraService();
+    _handTrackingService =
+        widget.handTrackingService ?? MediaPipeHandTrackingService();
+    _handTrackingSubscription = _handTrackingService.updates.listen((update) {
+      if (mounted) {
+        setState(() => _handTrackingUpdate = update);
+      }
+    });
     WidgetsBinding.instance.addObserver(this);
     unawaited(_initializeCamera());
   }
@@ -108,6 +123,7 @@ class _CameraScreenState extends State<CameraScreen>
     }
 
     _isInitializing = false;
+    CameraController? readyController;
     setState(() {
       _statusMessage = result.message;
       switch (result.status) {
@@ -119,6 +135,7 @@ class _CameraScreenState extends State<CameraScreen>
           } else {
             _viewState = _CameraViewState.ready;
             _controller = controller;
+            readyController = controller;
           }
         case CameraSetupStatus.noFrontCamera:
           _viewState = _CameraViewState.noFrontCamera;
@@ -132,6 +149,14 @@ class _CameraScreenState extends State<CameraScreen>
           _viewState = _CameraViewState.failure;
       }
     });
+
+    final controller = readyController;
+    if (controller != null &&
+        mounted &&
+        requestId == _requestId &&
+        _isAppActive) {
+      await _handTrackingService.start(controller);
+    }
   }
 
   void _scheduleOrientationRestart() {
@@ -159,7 +184,7 @@ class _CameraScreenState extends State<CameraScreen>
       });
     }
 
-    await _cameraService.dispose();
+    await _stopCameraAndTracking();
     if (!mounted || !_isAppActive || restartId != _requestId) {
       return;
     }
@@ -177,7 +202,7 @@ class _CameraScreenState extends State<CameraScreen>
         _statusMessage = 'Camera paused while the app is not active.';
       });
     }
-    await _cameraService.dispose();
+    await _stopCameraAndTracking();
   }
 
   Future<void> _resumeCamera() async {
@@ -194,14 +219,27 @@ class _CameraScreenState extends State<CameraScreen>
     _orientationRestartTimer?.cancel();
     _isAppActive = false;
     _requestId += 1;
-    unawaited(_cameraService.dispose());
+    final subscription = _handTrackingSubscription;
+    _handTrackingSubscription = null;
+    unawaited(subscription?.cancel());
+    unawaited(_disposeCameraAndTracking());
     super.dispose();
+  }
+
+  Future<void> _stopCameraAndTracking() async {
+    await _handTrackingService.stop();
+    await _cameraService.dispose();
+  }
+
+  Future<void> _disposeCameraAndTracking() async {
+    await _handTrackingService.dispose();
+    await _cameraService.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Front camera preview')),
+      appBar: AppBar(title: const Text('Hand tracking preview')),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -211,6 +249,7 @@ class _CameraScreenState extends State<CameraScreen>
                 child: _PreviewPanel(
                   viewState: _viewState,
                   controller: _controller,
+                  handTrackingUpdate: _handTrackingUpdate,
                 ),
               ),
               const SizedBox(height: 16),
@@ -247,10 +286,15 @@ class _CameraScreenState extends State<CameraScreen>
 }
 
 class _PreviewPanel extends StatelessWidget {
-  const _PreviewPanel({required this.viewState, required this.controller});
+  const _PreviewPanel({
+    required this.viewState,
+    required this.controller,
+    required this.handTrackingUpdate,
+  });
 
   final _CameraViewState viewState;
   final CameraController? controller;
+  final HandTrackingUpdate handTrackingUpdate;
 
   @override
   Widget build(BuildContext context) {
@@ -266,11 +310,100 @@ class _PreviewPanel extends StatelessWidget {
         color: Colors.black,
         child: Center(
           child: showPreview
-              ? CameraPreview(activeController)
+              ? CameraPreview(
+                  activeController,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      if (handTrackingUpdate.observation
+                          case final observation?)
+                        HandSkeletonOverlay(observation: observation),
+                      Align(
+                        alignment: Alignment.topCenter,
+                        child: _HandTrackingBadge(update: handTrackingUpdate),
+                      ),
+                    ],
+                  ),
+                )
               : _PreviewPlaceholder(viewState: viewState),
         ),
       ),
     );
+  }
+}
+
+class _HandTrackingBadge extends StatelessWidget {
+  const _HandTrackingBadge({required this.update});
+
+  final HandTrackingUpdate update;
+
+  @override
+  Widget build(BuildContext context) {
+    final label = switch (update.status) {
+      HandTrackingStatus.idle => 'Hand tracking paused',
+      HandTrackingStatus.starting => 'Starting hand tracking…',
+      HandTrackingStatus.searching => 'Show one hand',
+      HandTrackingStatus.tracking => _trackingLabel,
+      HandTrackingStatus.failure => 'Hand tracking unavailable',
+    };
+    final icon = update.status == HandTrackingStatus.tracking
+        ? Icons.pan_tool_alt_outlined
+        : update.status == HandTrackingStatus.failure
+        ? Icons.warning_amber_rounded
+        : Icons.center_focus_weak;
+    final semanticLabel = switch (update.status) {
+      HandTrackingStatus.idle => 'Hand tracking paused.',
+      HandTrackingStatus.starting => 'Starting hand tracking.',
+      HandTrackingStatus.searching => 'No hand detected. Show one hand.',
+      HandTrackingStatus.tracking =>
+        'Hand detected. One hand is being tracked.',
+      HandTrackingStatus.failure =>
+        'Hand tracking unavailable. ${update.message}',
+    };
+
+    return Semantics(
+      container: true,
+      liveRegion: true,
+      label: semanticLabel,
+      child: ExcludeSemantics(
+        child: Container(
+          margin: const EdgeInsets.all(12),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.78),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.white, width: 1.5),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, color: Colors.white, size: 20),
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String get _trackingLabel {
+    final fps = update.framesPerSecond.round();
+    final latency = update.processingLatency?.inMilliseconds;
+    if (latency == null) {
+      return 'Hand detected • $fps FPS';
+    }
+    return 'Hand detected • $fps FPS • $latency ms';
   }
 }
 

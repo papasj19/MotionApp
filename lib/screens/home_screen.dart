@@ -64,15 +64,15 @@ class HomeScreen extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Camera preview ready to test',
+                                  'Hand tracking ready to test',
                                   style: textTheme.titleMedium?.copyWith(
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
                                 const SizedBox(height: 8),
                                 const Text(
-                                  'Use the front camera to check positioning. '
-                                  'Motion tracking is not enabled yet.',
+                                  'Use the front camera to see a 21-point '
+                                  'skeleton follow one hand in real time.',
                                 ),
                               ],
                             ),
@@ -93,7 +93,7 @@ class HomeScreen extends StatelessWidget {
                       );
                     },
                     icon: const Icon(Icons.videocam_outlined),
-                    label: const Text('Open camera preview'),
+                    label: const Text('Open hand tracking preview'),
                   ),
                   const SizedBox(height: 20),
                   const Text(
