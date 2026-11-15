@@ -3,14 +3,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
 void main() {
-  testWidgets('shows the Stage 4 home screen', (tester) async {
+  testWidgets('shows the Stage 5 home screen', (tester) async {
     await tester.pumpWidget(const MaterialApp(home: HomeScreen()));
 
     expect(find.byType(Scaffold), findsOneWidget);
     expect(find.text('Adaptive Motion Arcade'), findsOneWidget);
     expect(find.text('Move in your way. Play in your way.'), findsOneWidget);
-    expect(find.text('Finger movement ready to test'), findsOneWidget);
-    expect(find.text('Open movement diagnostic'), findsOneWidget);
+    expect(find.text('Comfortable calibration ready'), findsOneWidget);
+    expect(find.text('Start comfortable calibration'), findsOneWidget);
     expect(
       find.text('Camera video stays in the live preview and is not saved.'),
       findsOneWidget,
@@ -27,7 +27,7 @@ void main() {
       ),
     );
 
-    await tester.tap(find.text('Open movement diagnostic'));
+    await tester.tap(find.text('Start comfortable calibration'));
     await tester.pumpAndSettle();
 
     expect(find.text('Injected camera screen'), findsOneWidget);

@@ -99,17 +99,11 @@ class BaselineCalibrationSession {
 
     final timestamp = reading.timestamp;
     final lastEventTimestamp = _lastEventTimestamp;
-    if (lastEventTimestamp != null && timestamp <= lastEventTimestamp) {
-      return _assessment(
-        timestamp: timestamp,
-        status: BaselineCalibrationStatus.outOfOrderSample,
-        message: 'A delayed tracking sample was ignored.',
-      );
-    }
-    _lastEventTimestamp = timestamp;
-
     final angle = reading.flexionDegrees;
     if (!reading.isValid || angle == null || !angle.isFinite) {
+      if (lastEventTimestamp == null || timestamp > lastEventTimestamp) {
+        _lastEventTimestamp = timestamp;
+      }
       _samples.clear();
       return _assessment(
         timestamp: timestamp,
@@ -118,6 +112,15 @@ class BaselineCalibrationSession {
             'Tracking paused. Reposition the camera or hand when comfortable.',
       );
     }
+
+    if (lastEventTimestamp != null && timestamp <= lastEventTimestamp) {
+      return _assessment(
+        timestamp: timestamp,
+        status: BaselineCalibrationStatus.outOfOrderSample,
+        message: 'A delayed tracking sample was ignored.',
+      );
+    }
+    _lastEventTimestamp = timestamp;
 
     final previousTimestamp = _samples.isEmpty ? null : _samples.last.timestamp;
     if (previousTimestamp != null &&

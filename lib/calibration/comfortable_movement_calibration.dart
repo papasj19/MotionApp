@@ -93,6 +93,7 @@ class ComfortableMovementAssessment {
     required this.stableDuration,
     this.detectedDirection,
     this.observedAmplitudeDegrees,
+    this.noiseFloorDegrees,
     this.reliableOffsetFloorDegrees,
     this.recommendation,
   });
@@ -104,6 +105,7 @@ class ComfortableMovementAssessment {
   final Duration stableDuration;
   final CalibrationDirection? detectedDirection;
   final double? observedAmplitudeDegrees;
+  final double? noiseFloorDegrees;
   final double? reliableOffsetFloorDegrees;
   final CalibrationThresholdRecommendation? recommendation;
 
@@ -141,17 +143,11 @@ class ComfortableMovementCalibrationSession {
 
     final timestamp = reading.timestamp;
     final lastEventTimestamp = _lastEventTimestamp;
-    if (lastEventTimestamp != null && timestamp <= lastEventTimestamp) {
-      return _assessment(
-        timestamp: timestamp,
-        status: ComfortableMovementStatus.outOfOrderSample,
-        message: 'A delayed tracking sample was ignored.',
-      );
-    }
-    _lastEventTimestamp = timestamp;
-
     final angle = reading.flexionDegrees;
     if (!reading.isValid || angle == null || !angle.isFinite) {
+      if (lastEventTimestamp == null || timestamp > lastEventTimestamp) {
+        _lastEventTimestamp = timestamp;
+      }
       _samples.clear();
       return _assessment(
         timestamp: timestamp,
@@ -160,6 +156,15 @@ class ComfortableMovementCalibrationSession {
             'Tracking paused. Reposition the camera or hand when comfortable.',
       );
     }
+
+    if (lastEventTimestamp != null && timestamp <= lastEventTimestamp) {
+      return _assessment(
+        timestamp: timestamp,
+        status: ComfortableMovementStatus.outOfOrderSample,
+        message: 'A delayed tracking sample was ignored.',
+      );
+    }
+    _lastEventTimestamp = timestamp;
 
     final previousTimestamp = _samples.isEmpty ? null : _samples.last.timestamp;
     if (previousTimestamp != null &&
@@ -205,6 +210,7 @@ class ComfortableMovementCalibrationSession {
             'signal variation. Retry or use a caregiver-adjusted setting.',
         detectedDirection: direction,
         observedAmplitudeDegrees: amplitude,
+        noiseFloorDegrees: noiseFloor,
         reliableOffsetFloorDegrees: reliableOffsetFloor,
       );
       _completedAssessment = assessment;
@@ -236,6 +242,7 @@ class ComfortableMovementCalibrationSession {
           'not require a larger movement.',
       detectedDirection: direction,
       observedAmplitudeDegrees: amplitude,
+      noiseFloorDegrees: noiseFloor,
       reliableOffsetFloorDegrees: reliableOffsetFloor,
       recommendation: recommendation,
     );
@@ -255,6 +262,7 @@ class ComfortableMovementCalibrationSession {
     required String message,
     CalibrationDirection? detectedDirection,
     double? observedAmplitudeDegrees,
+    double? noiseFloorDegrees,
     double? reliableOffsetFloorDegrees,
     CalibrationThresholdRecommendation? recommendation,
   }) {
@@ -266,6 +274,7 @@ class ComfortableMovementCalibrationSession {
       stableDuration: _stableDuration,
       detectedDirection: detectedDirection,
       observedAmplitudeDegrees: observedAmplitudeDegrees,
+      noiseFloorDegrees: noiseFloorDegrees,
       reliableOffsetFloorDegrees: reliableOffsetFloorDegrees,
       recommendation: recommendation,
     );

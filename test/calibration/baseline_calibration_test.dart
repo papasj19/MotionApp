@@ -87,7 +87,7 @@ void main() {
 
       final lost = session.accept(
         FingerMovementReading.unavailable(
-          timestamp: const Duration(milliseconds: 1750),
+          timestamp: Duration.zero,
           validity: FingerMovementValidity.missingObservation,
           note: 'No hand observation is available.',
         ),

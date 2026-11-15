@@ -6,15 +6,16 @@ a simple, reusable game control.
 
 ## Current scope
 
-Stage 5 is being delivered in small, testable parts. Stages 5A and 5B now
-provide in-memory baseline measurement and comfortable-movement analysis behind
-the existing Stage 4 diagnostic. The analysis can detect movement direction and
-recommend a threshold only when the observed movement is distinguishable from
-normal signal variation. There is no unfinished calibration screen in the app.
+Stage 5 provides a caregiver-guided, in-memory calibration workflow over the
+Stage 4 index-finger signal. It measures comfortable rest variation, observes
+one intentional movement, detects direction and recommends a threshold only
+when the movement is distinguishable from normal signal variation. The
+caregiver can review direction and sensitivity, retry either measurement, or
+use a validated manual fallback when the movement still exceeds measured noise.
 
-The app does not yet present the caregiver workflow, allow direction or
-sensitivity adjustment, create a controller signal, recognize a game gesture,
-run a game, or save a profile. Those remain separate later stages.
+The resulting calibration stays in memory. The app does not yet create a live
+controller signal, recognize a game gesture, run a game, save a profile or
+support a second tracked movement type. Those remain separate later stages.
 
 ## Architecture
 
@@ -25,13 +26,17 @@ camera frames -> MediaPipe adapter -> HandObservation -> skeleton overlay
                                       |
                                       +-> finger movement analyzer
                                                     |
-                                                    +-> diagnostic card
-                                                    |
                                                     +-> baseline session
                                                               |
                                                               +-> comfortable
                                                                   movement
                                                                   analysis
+                                                                        |
+                                                                        +-> caregiver
+                                                                            review
+                                                                        |
+                                                                        +-> in-memory
+                                                                            profile
 ```
 
 `HandObservation` is an app-owned type containing a timestamp, 21 normalized
@@ -108,8 +113,22 @@ observed amplitude does not exceed the larger of those values, no automatic
 threshold is produced. Otherwise, the starting threshold is halfway toward
 the comfortable value, raised to the reliable floor when necessary. This
 guarantees that a recommendation is never below the measured noise floor and
-never asks for movement beyond what was observed. Stage 5C will let a caregiver
-review, adjust, retry or use a validated manual setting.
+never asks for movement beyond what was observed.
+
+## Stage 5C–5D caregiver workflow
+
+The calibration screen guides the caregiver through rest measurement,
+comfortable movement and review. Direction can be changed between more bend
+and more straight. Sensitivity is limited to the range from measured noise to
+the observed comfortable amplitude. A setting below noise or beyond observed
+comfort cannot be accepted as reliable.
+
+When a small movement is above measured noise but below the conservative
+automatic 4-degree minimum, the caregiver may review a manual fallback. No
+manual fallback is offered when movement overlaps noise. The completed model
+includes movement type, degrees, baseline, noise estimate, noise floor,
+threshold, direction, timestamps, threshold source, camera facing, preview
+mirroring and device orientation. It is not persisted.
 
 ## Hand-tracking technology decision
 
@@ -169,25 +188,29 @@ flutter devices
 flutter run -d <device-id>
 ```
 
-On the movement diagnostic screen, check that:
+On the comfortable calibration screen, check that:
 
-1. A mostly straight index finger reads near `0°`.
-2. Bending the index PIP joint increases the approximate angle and shows
-   `Bending`; reversing direction shows `Straightening`.
-3. Holding still settles on `Steady` without hiding small angle changes.
-4. Removing the hand clears both the skeleton and number promptly; reacquiring
-   it starts from the current position without a jump from the old value.
-5. Mirroring and phone orientation do not change the angle for the same pose.
-6. Backgrounding and resuming the app restarts the diagnostic safely.
+1. The start button is available only while one hand is tracked.
+2. Resting comfortably for about two seconds completes step 1.
+3. One comfortable bend or straighten movement completes step 2 without any
+   request for a maximum range.
+4. The caregiver can review more bend/more straight and adjust sensitivity only
+   between the measured noise floor and observed comfortable movement.
+5. A tiny or noisy attempt offers a neutral retry; manual review appears only
+   when the observed movement is still above measured noise.
+6. Removing the hand during either measurement clears partial samples and says
+   tracking paused without implying failure by the child.
+7. Completing review reports that the calibration is not saved and clears when
+   the screen is closed.
+8. Rotating, backgrounding and resuming safely restarts camera tracking.
 
-This is a motion diagnostic, not a clinical goniometer. The UI rounds the
-estimate to whole degrees and prefixes it with `~` to avoid implying clinical
-or millimeter precision.
+This is a control calibration, not a clinical goniometer. The UI uses `~` and
+rounded values to avoid implying clinical or millimeter precision.
 
 Useful debugger breakpoints are `IndexFingerMovementAnalyzer.analyze` for each
-accepted sample, `_analyzeGeometry` for joint validity, and
-`CameraScreen._movementReadingFor` where tracking state becomes a diagnostic
-state.
+accepted sample, `BaselineCalibrationSession.accept` for rest measurement,
+`ComfortableMovementCalibrationSession.accept` for movement separation and
+`CalibrationProfileEditor.validate` for caregiver settings.
 
 Android release lint with Android Gradle Plugin 9.3 requires a JDK 21 runtime;
 debug builds work with the Android Studio JDK 17 bundled on the development

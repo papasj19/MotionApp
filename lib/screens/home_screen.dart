@@ -64,15 +64,16 @@ class HomeScreen extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Finger movement ready to test',
+                                  'Comfortable calibration ready',
                                   style: textTheme.titleMedium?.copyWith(
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
                                 const SizedBox(height: 8),
                                 const Text(
-                                  'Bend and straighten your index finger to '
-                                  'see an estimated joint angle in real time.',
+                                  'Measure a comfortable rest position and one '
+                                  'comfortable index-finger movement with '
+                                  'caregiver guidance.',
                                 ),
                               ],
                             ),
@@ -93,7 +94,7 @@ class HomeScreen extends StatelessWidget {
                       );
                     },
                     icon: const Icon(Icons.videocam_outlined),
-                    label: const Text('Open movement diagnostic'),
+                    label: const Text('Start comfortable calibration'),
                   ),
                   const SizedBox(height: 20),
                   const Text(

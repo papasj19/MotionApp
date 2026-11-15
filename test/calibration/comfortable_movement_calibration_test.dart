@@ -96,6 +96,7 @@ void main() {
       expect(assessment.hasReliableRecommendation, isFalse);
       expect(assessment.recommendation, isNull);
       expect(assessment.observedAmplitudeDegrees, closeTo(2, 0.01));
+      expect(assessment.noiseFloorDegrees, closeTo(1.5, 0.01));
       expect(assessment.reliableOffsetFloorDegrees, closeTo(4, 0.01));
     });
 
@@ -119,6 +120,7 @@ void main() {
         ComfortableMovementStatus.movementNotSeparatedFromNoise,
       );
       expect(assessment.observedAmplitudeDegrees, closeTo(10, 0.01));
+      expect(assessment.noiseFloorDegrees, closeTo(12, 0.01));
       expect(assessment.reliableOffsetFloorDegrees, closeTo(12, 0.01));
       expect(assessment.recommendation, isNull);
     });
@@ -132,7 +134,7 @@ void main() {
 
       final lost = session.accept(
         FingerMovementReading.unavailable(
-          timestamp: const Duration(milliseconds: 3500),
+          timestamp: Duration.zero,
           validity: FingerMovementValidity.missingObservation,
           note: 'No hand observation is available.',
         ),

@@ -3,12 +3,13 @@ import 'dart:async';
 import 'package:camera/camera.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../calibration/calibration_profile.dart';
 import '../hand_tracking/hand_tracking_service.dart';
 import '../hand_tracking/hand_tracking_update.dart';
 import '../hand_tracking/mediapipe_hand_tracking_service.dart';
 import '../movement/finger_movement_analyzer.dart';
 import '../services/camera_service.dart';
-import '../widgets/finger_movement_diagnostic.dart';
+import '../widgets/calibration_panel.dart';
 import '../widgets/hand_skeleton_overlay.dart';
 
 enum _CameraViewState {
@@ -250,44 +251,71 @@ class _CameraScreenState extends State<CameraScreen>
 
   @override
   Widget build(BuildContext context) {
+    final orientation = MediaQuery.orientationOf(context);
+    final setupContext = CalibrationSetupContext(
+      orientation: orientation == Orientation.portrait
+          ? CalibrationDeviceOrientation.portrait
+          : CalibrationDeviceOrientation.landscape,
+    );
+    final previewHeight = _viewState == _CameraViewState.ready
+        ? orientation == Orientation.portrait
+              ? 340.0
+              : 220.0
+        : 180.0;
     return Scaffold(
-      appBar: AppBar(title: const Text('Finger movement diagnostic')),
+      appBar: AppBar(title: const Text('Comfortable movement calibration')),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              Expanded(
-                child: _PreviewPanel(
-                  viewState: _viewState,
-                  controller: _controller,
-                  handTrackingUpdate: _handTrackingUpdate,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight - 32,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    SizedBox(
+                      height: previewHeight,
+                      child: _PreviewPanel(
+                        viewState: _viewState,
+                        controller: _controller,
+                        handTrackingUpdate: _handTrackingUpdate,
+                      ),
+                    ),
+                    if (_viewState != _CameraViewState.ready) ...[
+                      const SizedBox(height: 12),
+                      _StatusPanel(
+                        viewState: _viewState,
+                        message: _statusMessage,
+                        onRetry: _canRetry ? _initializeCamera : null,
+                      ),
+                    ],
+                    const SizedBox(height: 12),
+                    CalibrationPanel(
+                      reading: _movementReading,
+                      setupContext: setupContext,
+                    ),
+                    const SizedBox(height: 12),
+                    const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.privacy_tip_outlined, size: 20),
+                        SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            'Live preview only. Nothing is recorded or saved.',
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 12),
-              FingerMovementDiagnostic(reading: _movementReading),
-              const SizedBox(height: 12),
-              _StatusPanel(
-                viewState: _viewState,
-                message: _statusMessage,
-                onRetry: _canRetry ? _initializeCamera : null,
-              ),
-              const SizedBox(height: 12),
-              const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.privacy_tip_outlined, size: 20),
-                  SizedBox(width: 8),
-                  Flexible(
-                    child: Text(
-                      'Live preview only. Nothing is recorded or saved.',
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
