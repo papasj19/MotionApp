@@ -1,6 +1,6 @@
-import '../movement/finger_movement_analyzer.dart';
+import '../movement/movement_measurement.dart';
 
-enum CalibrationMovementType { indexFingerPipFlexion }
+export '../movement/movement_measurement.dart' show CalibrationMovementType;
 
 enum BaselineCalibrationStatus {
   collecting,
@@ -46,7 +46,7 @@ class CalibrationBaseline {
     required this.completedAt,
   });
 
-  static const unitName = FingerMovementReading.unitName;
+  static const unitName = 'degrees';
 
   final CalibrationMovementType movementType;
   final double baselineDegrees;
@@ -82,16 +82,19 @@ class BaselineCalibrationAssessment {
 /// Collects a continuous, time-bounded rest sample without retaining camera
 /// frames or hand landmarks.
 class BaselineCalibrationSession {
-  BaselineCalibrationSession({BaselineCalibrationConfig? config})
-    : config = config ?? BaselineCalibrationConfig();
+  BaselineCalibrationSession({
+    this.movementType = CalibrationMovementType.indexFingerBend,
+    BaselineCalibrationConfig? config,
+  }) : config = config ?? BaselineCalibrationConfig();
 
+  final CalibrationMovementType movementType;
   final BaselineCalibrationConfig config;
 
   final List<_BaselineSample> _samples = [];
   Duration? _lastEventTimestamp;
   BaselineCalibrationAssessment? _completedAssessment;
 
-  BaselineCalibrationAssessment accept(FingerMovementReading reading) {
+  BaselineCalibrationAssessment accept(MovementMeasurement reading) {
     final completedAssessment = _completedAssessment;
     if (completedAssessment != null) {
       return completedAssessment;
@@ -99,7 +102,7 @@ class BaselineCalibrationSession {
 
     final timestamp = reading.timestamp;
     final lastEventTimestamp = _lastEventTimestamp;
-    final angle = reading.flexionDegrees;
+    final angle = reading.valueDegrees;
     if (!reading.isValid || angle == null || !angle.isFinite) {
       if (lastEventTimestamp == null || timestamp > lastEventTimestamp) {
         _lastEventTimestamp = timestamp;
@@ -108,8 +111,7 @@ class BaselineCalibrationSession {
       return _assessment(
         timestamp: timestamp,
         status: BaselineCalibrationStatus.trackingUnavailable,
-        message:
-            'Tracking paused. Reposition the camera or hand when comfortable.',
+        message: 'Tracking paused. ${movementType.positioningHint}',
       );
     }
 
@@ -135,8 +137,7 @@ class BaselineCalibrationSession {
       return _assessment(
         timestamp: timestamp,
         status: BaselineCalibrationStatus.collecting,
-        message:
-            'Keep the hand comfortably at rest while the baseline is measured.',
+        message: movementType.restPrompt,
       );
     }
 
@@ -147,7 +148,7 @@ class BaselineCalibrationSession {
         .toList();
     final noiseEstimateDegrees = 1.4826 * _median(absoluteDeviations);
     final baseline = CalibrationBaseline(
-      movementType: CalibrationMovementType.indexFingerPipFlexion,
+      movementType: movementType,
       baselineDegrees: baselineDegrees,
       noiseEstimateDegrees: noiseEstimateDegrees,
       sampleCount: _samples.length,

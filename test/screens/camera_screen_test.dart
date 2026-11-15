@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:adaptive_motion_arcade/hand_tracking/hand_tracking_service.dart';
 import 'package:adaptive_motion_arcade/hand_tracking/hand_tracking_update.dart';
+import 'package:adaptive_motion_arcade/movement/movement_measurement.dart';
 import 'package:adaptive_motion_arcade/screens/camera_screen.dart';
 import 'package:adaptive_motion_arcade/services/camera_service.dart';
 import 'package:camera/camera.dart';
@@ -9,6 +10,35 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
 void main() {
+  testWidgets('requires an accessible movement choice before opening camera', (
+    tester,
+  ) async {
+    final service = _FakeCameraService([
+      const CameraSetupResult(
+        status: CameraSetupStatus.noFrontCamera,
+        message: 'No front-facing camera was found on this device.',
+      ),
+    ]);
+
+    await tester.pumpWidget(
+      MaterialApp(home: CameraScreen(cameraService: service)),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Choose a movement'), findsOneWidget);
+    expect(find.text('Finger'), findsOneWidget);
+    expect(find.text('Wrist'), findsOneWidget);
+    expect(find.text('Head'), findsOneWidget);
+    expect(find.textContaining('does not use blinking'), findsOneWidget);
+    expect(service.initializeCalls, 0);
+
+    await tester.tap(find.text('Wrist'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Wrist calibration'), findsOneWidget);
+    expect(service.initializeCalls, 1);
+  });
+
   testWidgets('reports when no front camera exists', (tester) async {
     final service = _FakeCameraService([
       const CameraSetupResult(
@@ -23,6 +53,7 @@ void main() {
         home: CameraScreen(
           cameraService: service,
           handTrackingService: tracking,
+          initialMovementType: CalibrationMovementType.indexFingerBend,
         ),
       ),
     );
@@ -62,6 +93,7 @@ void main() {
         home: CameraScreen(
           cameraService: service,
           handTrackingService: tracking,
+          initialMovementType: CalibrationMovementType.indexFingerBend,
         ),
       ),
     );
@@ -97,6 +129,7 @@ void main() {
         home: CameraScreen(
           cameraService: service,
           handTrackingService: tracking,
+          initialMovementType: CalibrationMovementType.indexFingerBend,
         ),
       ),
     );
@@ -134,6 +167,7 @@ void main() {
         home: CameraScreen(
           cameraService: service,
           handTrackingService: tracking,
+          initialMovementType: CalibrationMovementType.indexFingerBend,
         ),
       ),
     );
@@ -168,6 +202,7 @@ void main() {
         home: CameraScreen(
           cameraService: service,
           handTrackingService: tracking,
+          initialMovementType: CalibrationMovementType.indexFingerBend,
         ),
       ),
     );

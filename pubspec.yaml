@@ -63,8 +63,8 @@ flutter:
 hooks:
   user_defines:
     mediapipe_vision:
-      tasks: [hand_landmarker]
-      models: [hand_landmarker]
+      tasks: [hand_landmarker, face_landmarker, holistic_landmarker]
+      models: [hand_landmarker, face_landmarker, holistic_landmarker]
 
   # To add assets to your application, add an assets section, like this:
   # assets:

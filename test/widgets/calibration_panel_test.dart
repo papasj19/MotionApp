@@ -1,5 +1,6 @@
 import 'package:adaptive_motion_arcade/calibration/calibration_profile.dart';
 import 'package:adaptive_motion_arcade/movement/finger_movement_analyzer.dart';
+import 'package:adaptive_motion_arcade/movement/movement_measurement.dart';
 import 'package:adaptive_motion_arcade/widgets/calibration_panel.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -112,7 +113,7 @@ void main() {
 
     expect(
       find.text(
-        'Tracking paused. Reposition the camera or hand when comfortable.',
+        'Tracking paused. Show one hand clearly, including the full index finger.',
       ),
       findsOneWidget,
     );
@@ -152,6 +153,7 @@ Future<void> _pumpReading(
         body: SingleChildScrollView(
           child: CalibrationPanel(
             reading: reading,
+            movementType: CalibrationMovementType.indexFingerBend,
             setupContext: setupContext,
             now: () => completedAt,
           ),

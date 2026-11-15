@@ -39,7 +39,7 @@ void main() {
       expect(assessment.baseline!.units, 'degrees');
       expect(
         assessment.baseline!.movementType,
-        CalibrationMovementType.indexFingerPipFlexion,
+        CalibrationMovementType.indexFingerBend,
       );
 
       final afterCompletion = session.accept(_validReading(2250, 80));

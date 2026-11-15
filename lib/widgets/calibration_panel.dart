@@ -3,7 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import '../calibration/baseline_calibration.dart';
 import '../calibration/calibration_profile.dart';
 import '../calibration/comfortable_movement_calibration.dart';
-import '../movement/finger_movement_analyzer.dart';
+import '../movement/movement_measurement.dart';
 
 enum _CalibrationStep {
   ready,
@@ -17,12 +17,14 @@ enum _CalibrationStep {
 class CalibrationPanel extends StatefulWidget {
   const CalibrationPanel({
     required this.reading,
+    required this.movementType,
     required this.setupContext,
     this.now,
     super.key,
   });
 
-  final FingerMovementReading reading;
+  final MovementMeasurement reading;
+  final CalibrationMovementType movementType;
   final CalibrationSetupContext setupContext;
   final DateTime Function()? now;
 
@@ -51,7 +53,7 @@ class _CalibrationPanelState extends State<CalibrationPanel> {
     }
   }
 
-  void _acceptReading(FingerMovementReading reading) {
+  void _acceptReading(MovementMeasurement reading) {
     switch (_step) {
       case _CalibrationStep.baseline:
         final assessment = _baselineSession!.accept(reading);
@@ -81,7 +83,9 @@ class _CalibrationPanelState extends State<CalibrationPanel> {
 
   void _startBaseline() {
     setState(() {
-      _baselineSession = BaselineCalibrationSession();
+      _baselineSession = BaselineCalibrationSession(
+        movementType: widget.movementType,
+      );
       _baselineAssessment = null;
       _baseline = null;
       _movementSession = null;
@@ -196,7 +200,10 @@ class _CalibrationPanelState extends State<CalibrationPanel> {
                             ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                     ),
-                    _CurrentAngle(reading: widget.reading),
+                    _CurrentAngle(
+                      reading: widget.reading,
+                      movementType: widget.movementType,
+                    ),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -229,10 +236,12 @@ class _CalibrationPanelState extends State<CalibrationPanel> {
           'comfortable—never push for a maximum range.',
         ),
         const SizedBox(height: 8),
-        const Text('Movement available: index-finger bend and straighten.'),
+        Text('Selected movement: ${widget.movementType.shortLabel}.'),
+        const SizedBox(height: 4),
+        Text(widget.movementType.selectionDescription),
         if (!widget.reading.isValid) ...[
           const SizedBox(height: 8),
-          const Text('Show one hand clearly to enable calibration.'),
+          Text(widget.movementType.positioningHint),
         ],
         const SizedBox(height: 12),
         FilledButton.icon(
@@ -256,10 +265,7 @@ class _CalibrationPanelState extends State<CalibrationPanel> {
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 6),
-        Text(
-          assessment?.message ??
-              'Keep the hand comfortably at rest while the baseline is measured.',
-        ),
+        Text(assessment?.message ?? widget.movementType.restPrompt),
         if (assessment != null) ...[
           const SizedBox(height: 8),
           Text('Stable samples: ${assessment.stableSampleCount}'),
@@ -288,7 +294,7 @@ class _CalibrationPanelState extends State<CalibrationPanel> {
         const SizedBox(height: 6),
         Text(
           'Rest estimate: ~${baseline.baselineDegrees.round()}°. '
-          'Next, make one comfortable bend or straighten movement.',
+          'Next, ${widget.movementType.movementPrompt.toLowerCase()}',
         ),
         const SizedBox(height: 12),
         FilledButton.icon(
@@ -320,7 +326,7 @@ class _CalibrationPanelState extends State<CalibrationPanel> {
         const SizedBox(height: 6),
         Text(
           assessment?.message ??
-              'Make one comfortable movement when ready. Do not push farther.',
+              '${widget.movementType.movementPrompt} Do not push farther.',
         ),
         if (notSeparated) ...[
           const SizedBox(height: 12),
@@ -381,7 +387,7 @@ class _CalibrationPanelState extends State<CalibrationPanel> {
           runSpacing: 8,
           children: [
             ChoiceChip(
-              label: const Text('More bend'),
+              label: Text(widget.movementType.increasingDirectionLabel),
               selected: _direction == CalibrationDirection.increasingFlexion,
               onSelected: (_) {
                 setState(() {
@@ -391,7 +397,7 @@ class _CalibrationPanelState extends State<CalibrationPanel> {
               },
             ),
             ChoiceChip(
-              label: const Text('More straight'),
+              label: Text(widget.movementType.decreasingDirectionLabel),
               selected: _direction == CalibrationDirection.decreasingFlexion,
               onSelected: (_) {
                 setState(() {
@@ -455,8 +461,8 @@ class _CalibrationPanelState extends State<CalibrationPanel> {
     final profile = _profile!;
     final directionLabel =
         profile.direction == CalibrationDirection.increasingFlexion
-        ? 'more bend'
-        : 'more straight';
+        ? widget.movementType.increasingDirectionLabel.toLowerCase()
+        : widget.movementType.decreasingDirectionLabel.toLowerCase();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -497,19 +503,18 @@ class _CalibrationPanelState extends State<CalibrationPanel> {
 }
 
 class _CurrentAngle extends StatelessWidget {
-  const _CurrentAngle({required this.reading});
+  const _CurrentAngle({required this.reading, required this.movementType});
 
-  final FingerMovementReading reading;
+  final MovementMeasurement reading;
+  final CalibrationMovementType movementType;
 
   @override
   Widget build(BuildContext context) {
-    final label = reading.isValid
-        ? '~${reading.flexionDegrees!.round()}°'
-        : '—';
+    final label = reading.isValid ? '~${reading.valueDegrees!.round()}°' : '—';
     return Semantics(
       label: reading.isValid
-          ? 'Current estimated finger angle $label'
-          : 'Current finger angle unavailable',
+          ? 'Current estimated ${movementType.shortLabel.toLowerCase()} angle $label'
+          : 'Current ${movementType.shortLabel.toLowerCase()} angle unavailable',
       child: ExcludeSemantics(
         child: Text(
           label,

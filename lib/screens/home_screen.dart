@@ -45,8 +45,8 @@ class HomeScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Adaptive Motion Arcade will turn comfortable hand and '
-                    'finger movements into accessible game controls.',
+                    'Adaptive Motion Arcade will turn comfortable finger, '
+                    'wrist, or head movements into accessible game controls.',
                     textAlign: TextAlign.center,
                     style: textTheme.bodyLarge,
                   ),
@@ -72,8 +72,8 @@ class HomeScreen extends StatelessWidget {
                                 const SizedBox(height: 8),
                                 const Text(
                                   'Measure a comfortable rest position and one '
-                                  'comfortable index-finger movement with '
-                                  'caregiver guidance.',
+                                  'comfortable finger, wrist, or head movement '
+                                  'with caregiver guidance.',
                                 ),
                               ],
                             ),

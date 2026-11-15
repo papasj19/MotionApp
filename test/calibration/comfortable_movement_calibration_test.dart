@@ -215,7 +215,7 @@ ComfortableMovementAssessment _completeAttempt(
 
 CalibrationBaseline _baseline({required double angle, required double noise}) {
   return CalibrationBaseline(
-    movementType: CalibrationMovementType.indexFingerPipFlexion,
+    movementType: CalibrationMovementType.indexFingerBend,
     baselineDegrees: angle,
     noiseEstimateDegrees: noise,
     sampleCount: 9,

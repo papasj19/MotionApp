@@ -5,9 +5,11 @@ import 'package:material_ui/material_ui.dart';
 
 import '../calibration/calibration_profile.dart';
 import '../hand_tracking/hand_tracking_service.dart';
-import '../hand_tracking/hand_tracking_update.dart';
 import '../hand_tracking/mediapipe_hand_tracking_service.dart';
-import '../movement/finger_movement_analyzer.dart';
+import '../movement/movement_measurement.dart';
+import '../movement_tracking/hand_movement_tracking_adapter.dart';
+import '../movement_tracking/mediapipe_body_movement_tracking_service.dart';
+import '../movement_tracking/movement_tracking_service.dart';
 import '../services/camera_service.dart';
 import '../widgets/calibration_panel.dart';
 import '../widgets/hand_skeleton_overlay.dart';
@@ -23,10 +25,19 @@ enum _CameraViewState {
 }
 
 class CameraScreen extends StatefulWidget {
-  const CameraScreen({super.key, this.cameraService, this.handTrackingService});
+  const CameraScreen({
+    super.key,
+    this.cameraService,
+    this.handTrackingService,
+    this.trackingServiceFactory,
+    this.initialMovementType,
+  });
 
   final CameraService? cameraService;
   final HandTrackingService? handTrackingService;
+  final MovementTrackingService Function(CalibrationMovementType type)?
+  trackingServiceFactory;
+  final CalibrationMovementType? initialMovementType;
 
   @override
   State<CameraScreen> createState() => _CameraScreenState();
@@ -37,17 +48,13 @@ class _CameraScreenState extends State<CameraScreen>
   static const _orientationRestartDelay = Duration(milliseconds: 300);
 
   late final CameraService _cameraService;
-  late final HandTrackingService _handTrackingService;
-  late final IndexFingerMovementAnalyzer _movementAnalyzer;
-  StreamSubscription<HandTrackingUpdate>? _handTrackingSubscription;
+  MovementTrackingService? _trackingService;
+  StreamSubscription<MovementTrackingUpdate>? _trackingSubscription;
+  CalibrationMovementType? _selectedMovementType;
 
   _CameraViewState _viewState = _CameraViewState.initializing;
-  HandTrackingUpdate _handTrackingUpdate = const HandTrackingUpdate.idle();
-  FingerMovementReading _movementReading = FingerMovementReading.unavailable(
-    timestamp: Duration.zero,
-    validity: FingerMovementValidity.trackingUnavailable,
-    note: 'Hand tracking has not started.',
-  );
+  MovementTrackingUpdate? _trackingUpdate;
+  MovementMeasurement? _movementReading;
   CameraController? _controller;
   String _statusMessage = 'Starting the front camera…';
   bool _isAppActive = true;
@@ -61,19 +68,14 @@ class _CameraScreenState extends State<CameraScreen>
   void initState() {
     super.initState();
     _cameraService = widget.cameraService ?? DeviceCameraService();
-    _handTrackingService =
-        widget.handTrackingService ?? MediaPipeHandTrackingService();
-    _movementAnalyzer = IndexFingerMovementAnalyzer();
-    _handTrackingSubscription = _handTrackingService.updates.listen((update) {
-      if (mounted) {
-        setState(() {
-          _handTrackingUpdate = update;
-          _movementReading = _movementReadingFor(update);
-        });
-      }
-    });
+    _selectedMovementType = widget.initialMovementType;
+    if (_selectedMovementType case final movementType?) {
+      _configureTracking(movementType);
+    }
     WidgetsBinding.instance.addObserver(this);
-    unawaited(_initializeCamera());
+    if (_selectedMovementType != null) {
+      unawaited(_initializeCamera());
+    }
   }
 
   @override
@@ -83,7 +85,9 @@ class _CameraScreenState extends State<CameraScreen>
     final previousOrientation = _lastOrientation;
     _lastOrientation = orientation;
 
-    if (previousOrientation != null && previousOrientation != orientation) {
+    if (previousOrientation != null &&
+        previousOrientation != orientation &&
+        _selectedMovementType != null) {
       _scheduleOrientationRestart();
     }
   }
@@ -168,7 +172,7 @@ class _CameraScreenState extends State<CameraScreen>
         mounted &&
         requestId == _requestId &&
         _isAppActive) {
-      await _handTrackingService.start(controller);
+      await _trackingService?.start(controller);
     }
   }
 
@@ -221,7 +225,7 @@ class _CameraScreenState extends State<CameraScreen>
   Future<void> _resumeCamera() async {
     await _pauseOperation;
     _pauseOperation = null;
-    if (mounted && _isAppActive) {
+    if (mounted && _isAppActive && _selectedMovementType != null) {
       await _initializeCamera();
     }
   }
@@ -232,25 +236,33 @@ class _CameraScreenState extends State<CameraScreen>
     _orientationRestartTimer?.cancel();
     _isAppActive = false;
     _requestId += 1;
-    final subscription = _handTrackingSubscription;
-    _handTrackingSubscription = null;
+    final subscription = _trackingSubscription;
+    _trackingSubscription = null;
     unawaited(subscription?.cancel());
     unawaited(_disposeCameraAndTracking());
     super.dispose();
   }
 
   Future<void> _stopCameraAndTracking() async {
-    await _handTrackingService.stop();
+    await _trackingService?.stop();
     await _cameraService.dispose();
   }
 
   Future<void> _disposeCameraAndTracking() async {
-    await _handTrackingService.dispose();
-    await _cameraService.dispose();
+    final trackingDispose = _trackingService?.dispose();
+    final disposals = <Future<void>>[_cameraService.dispose()];
+    if (trackingDispose != null) {
+      disposals.add(trackingDispose);
+    }
+    await Future.wait(disposals);
   }
 
   @override
   Widget build(BuildContext context) {
+    final movementType = _selectedMovementType;
+    if (movementType == null) {
+      return _MovementSelectionScreen(onSelected: _selectMovement);
+    }
     final orientation = MediaQuery.orientationOf(context);
     final setupContext = CalibrationSetupContext(
       orientation: orientation == Orientation.portrait
@@ -262,8 +274,18 @@ class _CameraScreenState extends State<CameraScreen>
               ? 340.0
               : 220.0
         : 180.0;
+    final trackingUpdate = _trackingUpdate;
+    final movementReading = _movementReading;
     return Scaffold(
-      appBar: AppBar(title: const Text('Comfortable movement calibration')),
+      appBar: AppBar(
+        title: Text('${movementType.shortLabel} calibration'),
+        actions: [
+          TextButton(
+            onPressed: _returnToMovementSelection,
+            child: const Text('Change'),
+          ),
+        ],
+      ),
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -281,7 +303,8 @@ class _CameraScreenState extends State<CameraScreen>
                       child: _PreviewPanel(
                         viewState: _viewState,
                         controller: _controller,
-                        handTrackingUpdate: _handTrackingUpdate,
+                        trackingUpdate: trackingUpdate,
+                        movementType: movementType,
                       ),
                     ),
                     if (_viewState != _CameraViewState.ready) ...[
@@ -293,10 +316,14 @@ class _CameraScreenState extends State<CameraScreen>
                       ),
                     ],
                     const SizedBox(height: 12),
-                    CalibrationPanel(
-                      reading: _movementReading,
-                      setupContext: setupContext,
-                    ),
+                    if (movementReading != null)
+                      CalibrationPanel(
+                        reading: movementReading,
+                        movementType: movementType,
+                        setupContext: setupContext,
+                      )
+                    else
+                      _TrackingPreparationPanel(movementType: movementType),
                     const SizedBox(height: 12),
                     const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -326,24 +353,192 @@ class _CameraScreenState extends State<CameraScreen>
     _ => false,
   };
 
-  FingerMovementReading _movementReadingFor(HandTrackingUpdate update) {
-    final observation = update.observation;
-    if (observation != null) {
-      return _movementAnalyzer.analyze(observation);
-    }
+  void _configureTracking(CalibrationMovementType movementType) {
+    final service =
+        widget.trackingServiceFactory?.call(movementType) ??
+        switch (movementType) {
+          CalibrationMovementType.indexFingerBend =>
+            HandMovementTrackingAdapter(
+              widget.handTrackingService ?? MediaPipeHandTrackingService(),
+            ),
+          CalibrationMovementType.wristBend ||
+          CalibrationMovementType.headTilt =>
+            MediaPipeBodyMovementTrackingService(movementType: movementType),
+        };
+    _trackingService = service;
+    _trackingSubscription = service.updates.listen((update) {
+      if (mounted) {
+        setState(() {
+          _trackingUpdate = update;
+          _movementReading = update.reading;
+        });
+      }
+    });
+  }
 
-    final timestamp = update.timestamp;
-    if (update.status == HandTrackingStatus.searching && timestamp != null) {
-      return _movementAnalyzer.markMissing(timestamp);
-    }
+  void _selectMovement(CalibrationMovementType movementType) {
+    setState(() {
+      _selectedMovementType = movementType;
+      _viewState = _CameraViewState.initializing;
+      _statusMessage = 'Starting the front camera…';
+    });
+    _configureTracking(movementType);
+    unawaited(_initializeCamera());
+  }
 
-    _movementAnalyzer.reset();
-    return FingerMovementReading.unavailable(
-      timestamp: timestamp ?? Duration.zero,
-      validity: update.status == HandTrackingStatus.searching
-          ? FingerMovementValidity.missingObservation
-          : FingerMovementValidity.trackingUnavailable,
-      note: update.message,
+  Future<void> _returnToMovementSelection() async {
+    _orientationRestartTimer?.cancel();
+    _requestId += 1;
+    _isInitializing = false;
+    final subscription = _trackingSubscription;
+    final service = _trackingService;
+    _trackingSubscription = null;
+    _trackingService = null;
+    await subscription?.cancel();
+    await service?.dispose();
+    await _cameraService.dispose();
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _selectedMovementType = null;
+      _trackingUpdate = null;
+      _movementReading = null;
+      _controller = null;
+      _viewState = _CameraViewState.initializing;
+    });
+  }
+}
+
+class _MovementSelectionScreen extends StatelessWidget {
+  const _MovementSelectionScreen({required this.onSelected});
+
+  final ValueChanged<CalibrationMovementType> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Choose a movement')),
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            Text(
+              'What comfortable movement will control the game?',
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'A caregiver can choose the clearest option. Calibration measures '
+              'the child’s current comfortable movement and never asks for a '
+              'maximum range.',
+            ),
+            const SizedBox(height: 16),
+            for (final type in CalibrationMovementType.values) ...[
+              _MovementChoiceCard(
+                movementType: type,
+                onTap: () => onSelected(type),
+              ),
+              const SizedBox(height: 12),
+            ],
+            const Text(
+              'Head control uses left/right tilt only. It does not use blinking '
+              'or facial expressions.',
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MovementChoiceCard extends StatelessWidget {
+  const _MovementChoiceCard({required this.movementType, required this.onTap});
+
+  final CalibrationMovementType movementType;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final icon = switch (movementType) {
+      CalibrationMovementType.indexFingerBend => Icons.touch_app_outlined,
+      CalibrationMovementType.wristBend => Icons.pan_tool_alt_outlined,
+      CalibrationMovementType.headTilt => Icons.face_outlined,
+    };
+    return Semantics(
+      button: true,
+      label: '${movementType.shortLabel}. ${movementType.selectionDescription}',
+      child: Card(
+        margin: EdgeInsets.zero,
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(18),
+            child: Row(
+              children: [
+                Icon(icon, size: 40),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        movementType.shortLabel,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(movementType.selectionDescription),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                const Icon(Icons.chevron_right, size: 30),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TrackingPreparationPanel extends StatelessWidget {
+  const _TrackingPreparationPanel({required this.movementType});
+
+  final CalibrationMovementType movementType;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Icon(Icons.center_focus_weak),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Preparing movement tracking',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(movementType.positioningHint),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -352,12 +547,14 @@ class _PreviewPanel extends StatelessWidget {
   const _PreviewPanel({
     required this.viewState,
     required this.controller,
-    required this.handTrackingUpdate,
+    required this.trackingUpdate,
+    required this.movementType,
   });
 
   final _CameraViewState viewState;
   final CameraController? controller;
-  final HandTrackingUpdate handTrackingUpdate;
+  final MovementTrackingUpdate? trackingUpdate;
+  final CalibrationMovementType movementType;
 
   @override
   Widget build(BuildContext context) {
@@ -378,12 +575,15 @@ class _PreviewPanel extends StatelessWidget {
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      if (handTrackingUpdate.observation
+                      if (trackingUpdate?.handObservation
                           case final observation?)
                         HandSkeletonOverlay(observation: observation),
                       Align(
                         alignment: Alignment.topCenter,
-                        child: _HandTrackingBadge(update: handTrackingUpdate),
+                        child: _MovementTrackingBadge(
+                          update: trackingUpdate,
+                          movementType: movementType,
+                        ),
                       ),
                     ],
                   ),
@@ -395,33 +595,38 @@ class _PreviewPanel extends StatelessWidget {
   }
 }
 
-class _HandTrackingBadge extends StatelessWidget {
-  const _HandTrackingBadge({required this.update});
+class _MovementTrackingBadge extends StatelessWidget {
+  const _MovementTrackingBadge({
+    required this.update,
+    required this.movementType,
+  });
 
-  final HandTrackingUpdate update;
+  final MovementTrackingUpdate? update;
+  final CalibrationMovementType movementType;
 
   @override
   Widget build(BuildContext context) {
-    final label = switch (update.status) {
-      HandTrackingStatus.idle => 'Hand tracking paused',
-      HandTrackingStatus.starting => 'Starting hand tracking…',
-      HandTrackingStatus.searching => 'Show one hand',
-      HandTrackingStatus.tracking => _trackingLabel,
-      HandTrackingStatus.failure => 'Hand tracking unavailable',
+    final status = update?.status ?? MovementTrackingStatus.starting;
+    final label = switch (status) {
+      MovementTrackingStatus.idle => 'Tracking paused',
+      MovementTrackingStatus.starting => 'Starting tracking…',
+      MovementTrackingStatus.searching => movementType.positioningHint,
+      MovementTrackingStatus.tracking => _trackingLabel,
+      MovementTrackingStatus.failure => 'Tracking unavailable',
     };
-    final icon = update.status == HandTrackingStatus.tracking
+    final icon = status == MovementTrackingStatus.tracking
         ? Icons.pan_tool_alt_outlined
-        : update.status == HandTrackingStatus.failure
+        : status == MovementTrackingStatus.failure
         ? Icons.warning_amber_rounded
         : Icons.center_focus_weak;
-    final semanticLabel = switch (update.status) {
-      HandTrackingStatus.idle => 'Hand tracking paused.',
-      HandTrackingStatus.starting => 'Starting hand tracking.',
-      HandTrackingStatus.searching => 'No hand detected. Show one hand.',
-      HandTrackingStatus.tracking =>
-        'Hand detected. One hand is being tracked.',
-      HandTrackingStatus.failure =>
-        'Hand tracking unavailable. ${update.message}',
+    final semanticLabel = switch (status) {
+      MovementTrackingStatus.idle => 'Movement tracking paused.',
+      MovementTrackingStatus.starting => 'Starting movement tracking.',
+      MovementTrackingStatus.searching => movementType.positioningHint,
+      MovementTrackingStatus.tracking =>
+        '${movementType.shortLabel} movement is being tracked.',
+      MovementTrackingStatus.failure =>
+        'Movement tracking unavailable. ${update?.message ?? ''}',
     };
 
     return Semantics(
@@ -461,12 +666,12 @@ class _HandTrackingBadge extends StatelessWidget {
   }
 
   String get _trackingLabel {
-    final fps = update.framesPerSecond.round();
-    final latency = update.processingLatency?.inMilliseconds;
+    final fps = update?.framesPerSecond.round() ?? 0;
+    final latency = update?.processingLatency?.inMilliseconds;
     if (latency == null) {
-      return 'Hand detected • $fps FPS';
+      return '${movementType.shortLabel} detected • $fps FPS';
     }
-    return 'Hand detected • $fps FPS • $latency ms';
+    return '${movementType.shortLabel} detected • $fps FPS • $latency ms';
   }
 }
 

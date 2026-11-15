@@ -2,9 +2,19 @@
   "note": "Written by `dart run mediapipe_core:bundle_models`. List models in pubspec.yaml instead of editing this file.",
   "models": [
     {
+      "model": "mediapipe_vision: face_landmarker",
+      "file": "64184e229b263107bc2b804c6625db1341ff2bb731874b0bcc2fe6544e0bc9ff",
+      "url": "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task"
+    },
+    {
       "model": "mediapipe_vision: hand_landmarker",
       "file": "fbc2a30080c3c557093b5ddfc334698132eb341044ccee322ccf8bcf3607cde1",
       "url": "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task"
+    },
+    {
+      "model": "mediapipe_vision: holistic_landmarker",
+      "file": "e2dab61191e2dcd0a15f943d8e3ed1dce13c82dfa597b9dd39f562975a50c3f8",
+      "url": "https://storage.googleapis.com/mediapipe-models/holistic_landmarker/holistic_landmarker/float16/1/holistic_landmarker.task"
     }
   ]
 }

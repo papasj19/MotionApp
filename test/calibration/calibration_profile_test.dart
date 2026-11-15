@@ -152,11 +152,38 @@ void main() {
     expect(result.status, CalibrationValidationStatus.outsideSignalRange);
     expect(result.isReliable, isFalse);
   });
+
+  test('supports signed head-tilt angles on both sides of neutral', () {
+    const recommendation = CalibrationThresholdRecommendation(
+      movementType: CalibrationMovementType.headTilt,
+      direction: CalibrationDirection.decreasingFlexion,
+      baselineDegrees: -5,
+      noiseEstimateDegrees: 1,
+      noiseFloorDegrees: 3,
+      comfortableValueDegrees: -20,
+      movementAmplitudeDegrees: 15,
+      thresholdDegrees: -12.5,
+      thresholdOffsetDegrees: 7.5,
+      timestamp: Duration(seconds: 4),
+    );
+
+    final result = CalibrationProfileEditor.fromRecommendation(recommendation)
+        .validate(
+          direction: recommendation.direction,
+          thresholdOffsetDegrees: recommendation.thresholdOffsetDegrees,
+          completedAt: completedAt,
+          setupContext: portraitContext,
+        );
+
+    expect(result.isReliable, isTrue);
+    expect(result.profile!.thresholdDegrees, -12.5);
+    expect(result.profile!.movementType, CalibrationMovementType.headTilt);
+  });
 }
 
 CalibrationThresholdRecommendation _recommendation() {
   return const CalibrationThresholdRecommendation(
-    movementType: CalibrationMovementType.indexFingerPipFlexion,
+    movementType: CalibrationMovementType.indexFingerBend,
     direction: CalibrationDirection.increasingFlexion,
     baselineDegrees: 20,
     noiseEstimateDegrees: 1,
@@ -171,7 +198,7 @@ CalibrationThresholdRecommendation _recommendation() {
 
 CalibrationBaseline _baseline({double angle = 20}) {
   return CalibrationBaseline(
-    movementType: CalibrationMovementType.indexFingerPipFlexion,
+    movementType: CalibrationMovementType.indexFingerBend,
     baselineDegrees: angle,
     noiseEstimateDegrees: 0.5,
     sampleCount: 9,

@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import '../hand_tracking/hand_observation.dart';
+import 'movement_measurement.dart';
 
 enum FingerMovementValidity {
   valid,
@@ -75,7 +76,7 @@ class MovementQualityMetadata {
   final bool reacquired;
 }
 
-class FingerMovementReading {
+class FingerMovementReading implements MovementMeasurement {
   const FingerMovementReading({
     required this.timestamp,
     required this.validity,
@@ -104,6 +105,7 @@ class FingerMovementReading {
 
   static const unitName = 'degrees';
 
+  @override
   final Duration timestamp;
   final FingerMovementValidity validity;
   final MovementQualityMetadata quality;
@@ -112,7 +114,12 @@ class FingerMovementReading {
   final double? rawFlexionDegrees;
   final double? velocityDegreesPerSecond;
 
+  @override
   bool get isValid => validity == FingerMovementValidity.valid;
+
+  @override
+  double? get valueDegrees => flexionDegrees;
+
   String get units => unitName;
 }
 

@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-import '../movement/finger_movement_analyzer.dart';
+import '../movement/movement_measurement.dart';
 import 'baseline_calibration.dart';
 import 'comfortable_movement_calibration.dart';
 
@@ -50,7 +50,7 @@ class CalibrationProfile {
     required this.setupContext,
   });
 
-  static const unitName = FingerMovementReading.unitName;
+  static const unitName = 'degrees';
 
   final CalibrationMovementType movementType;
   final double baselineDegrees;
@@ -108,8 +108,10 @@ class CalibrationProfileEditor {
     ];
     if (!recommendation.isReliable ||
         values.any((value) => !value.isFinite) ||
-        recommendation.baselineDegrees < 0 ||
-        recommendation.baselineDegrees > 180 ||
+        recommendation.baselineDegrees <
+            recommendation.movementType.minimumDegrees ||
+        recommendation.baselineDegrees >
+            recommendation.movementType.maximumDegrees ||
         recommendation.noiseEstimateDegrees < 0 ||
         recommendation.noiseFloorDegrees < 0) {
       throw ArgumentError('The automatic recommendation is not reliable.');
@@ -141,8 +143,8 @@ class CalibrationProfileEditor {
       noiseFloorDegrees,
     ];
     if (values.any((value) => !value.isFinite) ||
-        baseline.baselineDegrees < 0 ||
-        baseline.baselineDegrees > 180 ||
+        baseline.baselineDegrees < baseline.movementType.minimumDegrees ||
+        baseline.baselineDegrees > baseline.movementType.maximumDegrees ||
         baseline.noiseEstimateDegrees < 0 ||
         comfortableAmplitudeDegrees <= noiseFloorDegrees ||
         noiseFloorDegrees < 0) {
@@ -211,7 +213,8 @@ class CalibrationProfileEditor {
 
     final sign = direction == CalibrationDirection.increasingFlexion ? 1 : -1;
     final thresholdDegrees = baselineDegrees + sign * thresholdOffsetDegrees;
-    if (thresholdDegrees < 0 || thresholdDegrees > 180) {
+    if (thresholdDegrees < movementType.minimumDegrees ||
+        thresholdDegrees > movementType.maximumDegrees) {
       return const CalibrationValidationResult(
         status: CalibrationValidationStatus.outsideSignalRange,
         message:

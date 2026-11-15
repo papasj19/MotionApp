@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-import '../movement/finger_movement_analyzer.dart';
+import '../movement/movement_measurement.dart';
 import 'baseline_calibration.dart';
 
 enum CalibrationDirection { increasingFlexion, decreasingFlexion }
@@ -64,7 +64,7 @@ class CalibrationThresholdRecommendation {
     required this.timestamp,
   });
 
-  static const unitName = FingerMovementReading.unitName;
+  static const unitName = 'degrees';
 
   final CalibrationMovementType movementType;
   final CalibrationDirection direction;
@@ -135,7 +135,7 @@ class ComfortableMovementCalibrationSession {
   Duration? _lastEventTimestamp;
   ComfortableMovementAssessment? _completedAssessment;
 
-  ComfortableMovementAssessment accept(FingerMovementReading reading) {
+  ComfortableMovementAssessment accept(MovementMeasurement reading) {
     final completedAssessment = _completedAssessment;
     if (completedAssessment != null) {
       return completedAssessment;
@@ -143,7 +143,7 @@ class ComfortableMovementCalibrationSession {
 
     final timestamp = reading.timestamp;
     final lastEventTimestamp = _lastEventTimestamp;
-    final angle = reading.flexionDegrees;
+    final angle = reading.valueDegrees;
     if (!reading.isValid || angle == null || !angle.isFinite) {
       if (lastEventTimestamp == null || timestamp > lastEventTimestamp) {
         _lastEventTimestamp = timestamp;
@@ -152,8 +152,7 @@ class ComfortableMovementCalibrationSession {
       return _assessment(
         timestamp: timestamp,
         status: ComfortableMovementStatus.trackingUnavailable,
-        message:
-            'Tracking paused. Reposition the camera or hand when comfortable.',
+        message: 'Tracking paused. ${baseline.movementType.positioningHint}',
       );
     }
 
@@ -179,8 +178,7 @@ class ComfortableMovementCalibrationSession {
       return _assessment(
         timestamp: timestamp,
         status: ComfortableMovementStatus.collecting,
-        message:
-            'Make one comfortable movement when ready. Do not push farther.',
+        message: '${baseline.movementType.movementPrompt} Do not push farther.',
       );
     }
 

@@ -27,6 +27,7 @@ void main() {
       ),
     );
 
+    await tester.ensureVisible(find.text('Start comfortable calibration'));
     await tester.tap(find.text('Start comfortable calibration'));
     await tester.pumpAndSettle();
 
