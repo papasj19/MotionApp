@@ -6,15 +6,15 @@ a simple, reusable game control.
 
 ## Current scope
 
-Stage 5 is being delivered in small, testable parts. Stage 5A adds an in-memory
-rest/baseline measurement component behind the existing Stage 4 index-finger
-movement diagnostic. It checks for a continuous usable tracking interval and
-estimates the resting value and normal signal variation. There is no unfinished
-calibration screen in the app yet.
+Stage 5 is being delivered in small, testable parts. Stages 5A and 5B now
+provide in-memory baseline measurement and comfortable-movement analysis behind
+the existing Stage 4 diagnostic. The analysis can detect movement direction and
+recommend a threshold only when the observed movement is distinguishable from
+normal signal variation. There is no unfinished calibration screen in the app.
 
-The app does not yet ask for a comfortable intentional movement, recommend or
-adjust a threshold, create a controller signal, recognize a game gesture, run a
-game, or save a profile. Those remain separate later stages.
+The app does not yet present the caregiver workflow, allow direction or
+sensitivity adjustment, create a controller signal, recognize a game gesture,
+run a game, or save a profile. Those remain separate later stages.
 
 ## Architecture
 
@@ -28,6 +28,10 @@ camera frames -> MediaPipe adapter -> HandObservation -> skeleton overlay
                                                     +-> diagnostic card
                                                     |
                                                     +-> baseline session
+                                                              |
+                                                              +-> comfortable
+                                                                  movement
+                                                                  analysis
 ```
 
 `HandObservation` is an app-owned type containing a timestamp, 21 normalized
@@ -88,8 +92,24 @@ median absolute deviation multiplied by 1.4826, a robust estimate that is less
 affected by an occasional unusual reading. A default estimate above 6 degrees
 is reported as too variable for an automatic setting, but never as a failure by
 the child. These are engineering defaults for the future caregiver workflow,
-not clinical limits. Stage 5B will compare a comfortable intentional movement
-against this noise before recommending any threshold.
+not clinical limits. Stage 5B compares a comfortable intentional movement
+against this noise before recommending a threshold.
+
+## Stage 5B comfortable-movement analysis
+
+`ComfortableMovementCalibrationSession` observes one intentional movement for
+at least 1.5 seconds without asking for a maximum range. It uses robust 10th and
+90th percentiles around the rest baseline to detect whether comfortable motion
+decreases or increases the flexion angle.
+
+The default noise floor is three times the Stage 5A noise estimate. A reliable
+offset must also exceed a conservative 4-degree engineering minimum. If the
+observed amplitude does not exceed the larger of those values, no automatic
+threshold is produced. Otherwise, the starting threshold is halfway toward
+the comfortable value, raised to the reliable floor when necessary. This
+guarantees that a recommendation is never below the measured noise floor and
+never asks for movement beyond what was observed. Stage 5C will let a caregiver
+review, adjust, retry or use a validated manual setting.
 
 ## Hand-tracking technology decision
 
