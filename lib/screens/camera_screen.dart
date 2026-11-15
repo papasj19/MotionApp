@@ -6,7 +6,9 @@ import 'package:material_ui/material_ui.dart';
 import '../hand_tracking/hand_tracking_service.dart';
 import '../hand_tracking/hand_tracking_update.dart';
 import '../hand_tracking/mediapipe_hand_tracking_service.dart';
+import '../movement/finger_movement_analyzer.dart';
 import '../services/camera_service.dart';
+import '../widgets/finger_movement_diagnostic.dart';
 import '../widgets/hand_skeleton_overlay.dart';
 
 enum _CameraViewState {
@@ -35,10 +37,16 @@ class _CameraScreenState extends State<CameraScreen>
 
   late final CameraService _cameraService;
   late final HandTrackingService _handTrackingService;
+  late final IndexFingerMovementAnalyzer _movementAnalyzer;
   StreamSubscription<HandTrackingUpdate>? _handTrackingSubscription;
 
   _CameraViewState _viewState = _CameraViewState.initializing;
   HandTrackingUpdate _handTrackingUpdate = const HandTrackingUpdate.idle();
+  FingerMovementReading _movementReading = FingerMovementReading.unavailable(
+    timestamp: Duration.zero,
+    validity: FingerMovementValidity.trackingUnavailable,
+    note: 'Hand tracking has not started.',
+  );
   CameraController? _controller;
   String _statusMessage = 'Starting the front camera…';
   bool _isAppActive = true;
@@ -54,9 +62,13 @@ class _CameraScreenState extends State<CameraScreen>
     _cameraService = widget.cameraService ?? DeviceCameraService();
     _handTrackingService =
         widget.handTrackingService ?? MediaPipeHandTrackingService();
+    _movementAnalyzer = IndexFingerMovementAnalyzer();
     _handTrackingSubscription = _handTrackingService.updates.listen((update) {
       if (mounted) {
-        setState(() => _handTrackingUpdate = update);
+        setState(() {
+          _handTrackingUpdate = update;
+          _movementReading = _movementReadingFor(update);
+        });
       }
     });
     WidgetsBinding.instance.addObserver(this);
@@ -239,7 +251,7 @@ class _CameraScreenState extends State<CameraScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Hand tracking preview')),
+      appBar: AppBar(title: const Text('Finger movement diagnostic')),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -252,7 +264,9 @@ class _CameraScreenState extends State<CameraScreen>
                   handTrackingUpdate: _handTrackingUpdate,
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
+              FingerMovementDiagnostic(reading: _movementReading),
+              const SizedBox(height: 12),
               _StatusPanel(
                 viewState: _viewState,
                 message: _statusMessage,
@@ -283,6 +297,27 @@ class _CameraScreenState extends State<CameraScreen>
     _CameraViewState.permissionDenied || _CameraViewState.failure => true,
     _ => false,
   };
+
+  FingerMovementReading _movementReadingFor(HandTrackingUpdate update) {
+    final observation = update.observation;
+    if (observation != null) {
+      return _movementAnalyzer.analyze(observation);
+    }
+
+    final timestamp = update.timestamp;
+    if (update.status == HandTrackingStatus.searching && timestamp != null) {
+      return _movementAnalyzer.markMissing(timestamp);
+    }
+
+    _movementAnalyzer.reset();
+    return FingerMovementReading.unavailable(
+      timestamp: timestamp ?? Duration.zero,
+      validity: update.status == HandTrackingStatus.searching
+          ? FingerMovementValidity.missingObservation
+          : FingerMovementValidity.trackingUnavailable,
+      note: update.message,
+    );
+  }
 }
 
 class _PreviewPanel extends StatelessWidget {

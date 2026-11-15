@@ -64,15 +64,15 @@ class HomeScreen extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Hand tracking ready to test',
+                                  'Finger movement ready to test',
                                   style: textTheme.titleMedium?.copyWith(
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
                                 const SizedBox(height: 8),
                                 const Text(
-                                  'Use the front camera to see a 21-point '
-                                  'skeleton follow one hand in real time.',
+                                  'Bend and straighten your index finger to '
+                                  'see an estimated joint angle in real time.',
                                 ),
                               ],
                             ),
@@ -93,7 +93,7 @@ class HomeScreen extends StatelessWidget {
                       );
                     },
                     icon: const Icon(Icons.videocam_outlined),
-                    label: const Text('Open hand tracking preview'),
+                    label: const Text('Open movement diagnostic'),
                   ),
                   const SizedBox(height: 20),
                   const Text(

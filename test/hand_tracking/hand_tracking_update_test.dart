@@ -9,6 +9,7 @@ void main() {
     final update = monitor.acceptResult(
       observation: null,
       receivedAt: Duration.zero,
+      sampleTimestamp: Duration.zero,
       framesPerSecond: 12,
       processingLatency: const Duration(milliseconds: 45),
       droppedFrames: 2,
@@ -17,6 +18,7 @@ void main() {
     expect(update.status, HandTrackingStatus.searching);
     expect(update.observation, isNull);
     expect(update.message, contains('Show one hand'));
+    expect(update.timestamp, Duration.zero);
   });
 
   test('reports tracking and clears a stale observation', () {
@@ -28,6 +30,7 @@ void main() {
     final tracking = monitor.acceptResult(
       observation: observation,
       receivedAt: const Duration(milliseconds: 100),
+      sampleTimestamp: const Duration(milliseconds: 70),
       framesPerSecond: 15,
       processingLatency: const Duration(milliseconds: 30),
       droppedFrames: 0,
@@ -49,6 +52,7 @@ void main() {
     expect(stale?.status, HandTrackingStatus.searching);
     expect(stale?.observation, isNull);
     expect(stale?.message, contains('paused'));
+    expect(stale?.timestamp, const Duration(milliseconds: 850));
   });
 
   test('tracking can be reacquired after a stale result', () {
@@ -59,6 +63,7 @@ void main() {
     monitor.acceptResult(
       observation: observation,
       receivedAt: Duration.zero,
+      sampleTimestamp: Duration.zero,
       framesPerSecond: 10,
       processingLatency: Duration.zero,
       droppedFrames: 0,
@@ -72,6 +77,7 @@ void main() {
     final reacquired = monitor.acceptResult(
       observation: observation,
       receivedAt: const Duration(milliseconds: 20),
+      sampleTimestamp: const Duration(milliseconds: 20),
       framesPerSecond: 10,
       processingLatency: Duration.zero,
       droppedFrames: 0,

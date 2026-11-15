@@ -251,6 +251,7 @@ class MediaPipeHandTrackingService implements HandTrackingService {
       _presenceMonitor.acceptResult(
         observation: observation,
         receivedAt: receivedAt,
+        sampleTimestamp: Duration(milliseconds: timestamp ?? 0),
         framesPerSecond: _framesPerSecond,
         processingLatency: latency,
         droppedFrames: _landmarker?.droppedFrames ?? 0,

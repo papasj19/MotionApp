@@ -10,6 +10,7 @@ class HandTrackingUpdate {
     this.framesPerSecond = 0,
     this.processingLatency,
     this.droppedFrames = 0,
+    this.timestamp,
   });
 
   const HandTrackingUpdate.idle()
@@ -30,6 +31,7 @@ class HandTrackingUpdate {
   final double framesPerSecond;
   final Duration? processingLatency;
   final int droppedFrames;
+  final Duration? timestamp;
 }
 
 class HandPresenceMonitor {
@@ -43,6 +45,7 @@ class HandPresenceMonitor {
   HandTrackingUpdate acceptResult({
     required HandObservation? observation,
     required Duration receivedAt,
+    required Duration sampleTimestamp,
     required double framesPerSecond,
     required Duration processingLatency,
     required int droppedFrames,
@@ -61,6 +64,7 @@ class HandPresenceMonitor {
       framesPerSecond: framesPerSecond,
       processingLatency: processingLatency,
       droppedFrames: droppedFrames,
+      timestamp: sampleTimestamp,
     );
   }
 
@@ -82,6 +86,7 @@ class HandPresenceMonitor {
       message: 'Tracking paused. Show one hand to continue.',
       framesPerSecond: framesPerSecond,
       droppedFrames: droppedFrames,
+      timestamp: now,
     );
   }
 
