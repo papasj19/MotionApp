@@ -73,6 +73,36 @@ void main() {
     expect(tracking.disposeCalls, 1);
   });
 
+  testWidgets('uses the Quick Play change-movement callback when provided', (
+    tester,
+  ) async {
+    final service = _FakeCameraService([
+      const CameraSetupResult(
+        status: CameraSetupStatus.noFrontCamera,
+        message: 'No front-facing camera was found on this device.',
+      ),
+    ]);
+    var changeRequests = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: CameraScreen(
+          cameraService: service,
+          handTrackingService: _FakeHandTrackingService(),
+          initialMovementType: CalibrationMovementType.headTilt,
+          onChangeMovement: () => changeRequests += 1,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Change'));
+    await tester.pump();
+
+    expect(changeRequests, 1);
+    expect(find.text('Choose a movement'), findsNothing);
+  });
+
   testWidgets('shows denied permission and retries', (tester) async {
     final service = _FakeCameraService([
       const CameraSetupResult(

@@ -1,9 +1,9 @@
 # Adaptive Motion Arcade — GUI Architecture and Screen Plan
 
-Status: approved POC direction with responsive wireframes prepared for review
-on 2026-11-15. School access and the possible third Student Hub action remain
-open until teacher interviews. This document does not authorize implementation
-of later stages.
+Status: approved POC direction. The responsive arcade lobby and Quick Play
+movement-selection foundation were implemented on 2026-11-16. School access
+and the possible third Student Hub action remain open until teacher interviews.
+This document does not authorize implementation of later stages.
 
 ## Product structure from the sketch
 
@@ -238,4 +238,7 @@ prioritize information clarity over arcade decoration.
    game/session-end loop.
 5. **Stage 10:** add Results using the privacy and measurement rules above.
 
-The next step is screen planning and approval, not implementation.
+The lobby now routes supported Head, Hand/Wrist, and Finger choices into the
+shared calibration and Control Test flow. School and Leg remain visibly
+unavailable rather than leading to fake screens. Game cartridges remain held
+for Stage 9, when at least one playable game exists.

@@ -34,6 +34,7 @@ class CameraScreen extends StatefulWidget {
     this.trackingServiceFactory,
     this.initialMovementType,
     this.enableSyntheticControllerInput = false,
+    this.onChangeMovement,
   });
 
   final CameraService? cameraService;
@@ -42,6 +43,7 @@ class CameraScreen extends StatefulWidget {
   trackingServiceFactory;
   final CalibrationMovementType? initialMovementType;
   final bool enableSyntheticControllerInput;
+  final VoidCallback? onChangeMovement;
 
   @override
   State<CameraScreen> createState() => _CameraScreenState();
@@ -299,10 +301,7 @@ class _CameraScreenState extends State<CameraScreen>
               : '${movementType.shortLabel} control test',
         ),
         actions: [
-          TextButton(
-            onPressed: _returnToMovementSelection,
-            child: const Text('Change'),
-          ),
+          TextButton(onPressed: _changeMovement, child: const Text('Change')),
         ],
       ),
       body: SafeArea(
@@ -440,6 +439,15 @@ class _CameraScreenState extends State<CameraScreen>
       _controller = null;
       _viewState = _CameraViewState.initializing;
     });
+  }
+
+  void _changeMovement() {
+    final onChangeMovement = widget.onChangeMovement;
+    if (onChangeMovement != null) {
+      onChangeMovement();
+      return;
+    }
+    unawaited(_returnToMovementSelection());
   }
 
   void _startControlTest(CalibrationProfile profile) {

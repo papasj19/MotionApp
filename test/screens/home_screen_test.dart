@@ -1,25 +1,30 @@
 import 'package:adaptive_motion_arcade/screens/home_screen.dart';
+import 'package:adaptive_motion_arcade/screens/quick_play_screen.dart';
+import 'package:adaptive_motion_arcade/theme/arcade_theme.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
 void main() {
-  testWidgets('shows the Stage 5 home screen', (tester) async {
-    await tester.pumpWidget(const MaterialApp(home: HomeScreen()));
-
-    expect(find.byType(Scaffold), findsOneWidget);
-    expect(find.text('Adaptive Motion Arcade'), findsOneWidget);
-    expect(find.text('Move in your way. Play in your way.'), findsOneWidget);
-    expect(find.text('Comfortable calibration ready'), findsOneWidget);
-    expect(find.text('Start comfortable calibration'), findsOneWidget);
-    expect(
-      find.text('Camera video stays in the live preview and is not saved.'),
-      findsOneWidget,
+  testWidgets('shows the responsive arcade lobby', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(theme: buildArcadeTheme(), home: const HomeScreen()),
     );
+
+    expect(find.text('ADAPTIVE MOTION'), findsOneWidget);
+    expect(find.text('ARCADE'), findsOneWidget);
+    expect(find.text('Quick Play'), findsOneWidget);
+    expect(find.text('Play without a profile'), findsOneWidget);
+    expect(find.text('School'), findsOneWidget);
+    expect(find.text('Planned after teacher feedback'), findsOneWidget);
+    expect(find.text('Start comfortable calibration'), findsNothing);
   });
 
-  testWidgets('opens the camera route from the home screen', (tester) async {
+  testWidgets('opens Quick Play and then the selected camera route', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
+        theme: buildArcadeTheme(),
         home: HomeScreen(
           cameraScreenBuilder: (_) =>
               const Scaffold(body: Text('Injected camera screen')),
@@ -27,10 +32,54 @@ void main() {
       ),
     );
 
-    await tester.ensureVisible(find.text('Start comfortable calibration'));
-    await tester.tap(find.text('Start comfortable calibration'));
+    await tester.tap(find.text('Quick Play'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(QuickPlayScreen), findsOneWidget);
+    expect(find.text('What feels comfortable today?'), findsOneWidget);
+
+    await tester.ensureVisible(find.text('Finger'));
+    await tester.tap(find.text('Finger'));
     await tester.pumpAndSettle();
 
     expect(find.text('Injected camera screen'), findsOneWidget);
+  });
+
+  testWidgets('keeps School unavailable until teacher interviews', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(theme: buildArcadeTheme(), home: const HomeScreen()),
+    );
+
+    await tester.tap(find.byKey(const Key('school-button')));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(HomeScreen), findsOneWidget);
+    expect(find.text('Planned after teacher feedback'), findsOneWidget);
+  });
+
+  testWidgets('lobby fits a compact landscape phone', (tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(640, 360);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetPhysicalSize);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: buildArcadeTheme(),
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(
+            context,
+          ).copyWith(textScaler: const TextScaler.linear(1.8)),
+          child: child!,
+        ),
+        home: const HomeScreen(),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('Quick Play'), findsOneWidget);
+    expect(find.text('School'), findsOneWidget);
   });
 }
