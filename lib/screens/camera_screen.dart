@@ -14,6 +14,7 @@ import '../services/camera_service.dart';
 import '../theme/arcade_theme.dart';
 import '../widgets/calibration_panel.dart';
 import '../widgets/hand_skeleton_overlay.dart';
+import '../widgets/motion_control_test_panel.dart';
 
 enum _CameraViewState {
   initializing,
@@ -32,6 +33,7 @@ class CameraScreen extends StatefulWidget {
     this.handTrackingService,
     this.trackingServiceFactory,
     this.initialMovementType,
+    this.enableSyntheticControllerInput = false,
   });
 
   final CameraService? cameraService;
@@ -39,6 +41,7 @@ class CameraScreen extends StatefulWidget {
   final MovementTrackingService Function(CalibrationMovementType type)?
   trackingServiceFactory;
   final CalibrationMovementType? initialMovementType;
+  final bool enableSyntheticControllerInput;
 
   @override
   State<CameraScreen> createState() => _CameraScreenState();
@@ -56,6 +59,7 @@ class _CameraScreenState extends State<CameraScreen>
   _CameraViewState _viewState = _CameraViewState.initializing;
   MovementTrackingUpdate? _trackingUpdate;
   MovementMeasurement? _movementReading;
+  CalibrationProfile? _controlTestProfile;
   CameraController? _controller;
   String _statusMessage = 'Starting the front camera…';
   bool _isAppActive = true;
@@ -131,6 +135,9 @@ class _CameraScreenState extends State<CameraScreen>
       setState(() {
         _viewState = _CameraViewState.initializing;
         _controller = null;
+        _trackingUpdate = null;
+        _movementReading = null;
+        _controlTestProfile = null;
         _statusMessage = startingMessage;
       });
     }
@@ -197,6 +204,9 @@ class _CameraScreenState extends State<CameraScreen>
     if (mounted) {
       setState(() {
         _controller = null;
+        _trackingUpdate = null;
+        _movementReading = null;
+        _controlTestProfile = null;
         _viewState = _CameraViewState.initializing;
         _statusMessage = 'Adjusting camera orientation…';
       });
@@ -216,6 +226,9 @@ class _CameraScreenState extends State<CameraScreen>
     if (mounted) {
       setState(() {
         _controller = null;
+        _trackingUpdate = null;
+        _movementReading = null;
+        _controlTestProfile = null;
         _viewState = _CameraViewState.paused;
         _statusMessage = 'Camera paused while the app is not active.';
       });
@@ -277,9 +290,14 @@ class _CameraScreenState extends State<CameraScreen>
         : 180.0;
     final trackingUpdate = _trackingUpdate;
     final movementReading = _movementReading;
+    final controlTestProfile = _controlTestProfile;
     return Scaffold(
       appBar: AppBar(
-        title: Text('${movementType.shortLabel} calibration'),
+        title: Text(
+          controlTestProfile == null
+              ? '${movementType.shortLabel} calibration'
+              : '${movementType.shortLabel} control test',
+        ),
         actions: [
           TextButton(
             onPressed: _returnToMovementSelection,
@@ -317,11 +335,23 @@ class _CameraScreenState extends State<CameraScreen>
                       ),
                     ],
                     const SizedBox(height: 12),
-                    if (movementReading != null)
+                    if (movementReading != null && controlTestProfile != null)
+                      MotionControlTestPanel(
+                        profile: controlTestProfile,
+                        reading: movementReading,
+                        onRecalibrate: _recalibrate,
+                        enableSyntheticInput:
+                            widget.enableSyntheticControllerInput,
+                      )
+                    else if (movementReading != null)
                       CalibrationPanel(
+                        key: ValueKey(
+                          '${movementType.name}-${setupContext.orientation.name}',
+                        ),
                         reading: movementReading,
                         movementType: movementType,
                         setupContext: setupContext,
+                        onControlTestRequested: _startControlTest,
                       )
                     else
                       _TrackingPreparationPanel(movementType: movementType),
@@ -380,6 +410,7 @@ class _CameraScreenState extends State<CameraScreen>
   void _selectMovement(CalibrationMovementType movementType) {
     setState(() {
       _selectedMovementType = movementType;
+      _controlTestProfile = null;
       _viewState = _CameraViewState.initializing;
       _statusMessage = 'Starting the front camera…';
     });
@@ -405,9 +436,18 @@ class _CameraScreenState extends State<CameraScreen>
       _selectedMovementType = null;
       _trackingUpdate = null;
       _movementReading = null;
+      _controlTestProfile = null;
       _controller = null;
       _viewState = _CameraViewState.initializing;
     });
+  }
+
+  void _startControlTest(CalibrationProfile profile) {
+    setState(() => _controlTestProfile = profile);
+  }
+
+  void _recalibrate() {
+    setState(() => _controlTestProfile = null);
   }
 }
 

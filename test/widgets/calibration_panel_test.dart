@@ -19,7 +19,18 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    await _pumpReading(tester, _reading(0, 20), setupContext, completedAt);
+    CalibrationProfile? requestedProfile;
+    void requestControlTest(CalibrationProfile profile) {
+      requestedProfile = profile;
+    }
+
+    await _pumpReading(
+      tester,
+      _reading(0, 20),
+      setupContext,
+      completedAt,
+      onControlTestRequested: requestControlTest,
+    );
     await tester.tap(find.text('Start rest measurement'));
     await tester.pump();
 
@@ -29,6 +40,7 @@ void main() {
         _reading(index * 250, 20),
         setupContext,
         completedAt,
+        onControlTestRequested: requestControlTest,
       );
     }
     expect(find.text('Rest measurement complete'), findsOneWidget);
@@ -42,6 +54,7 @@ void main() {
         _reading(2250 + index * 250, movementAngles[index]),
         setupContext,
         completedAt,
+        onControlTestRequested: requestControlTest,
       );
     }
 
@@ -58,6 +71,14 @@ void main() {
     expect(
       find.textContaining('not saved and clears when you leave this screen'),
       findsOneWidget,
+    );
+    expect(find.text('Test this control'), findsOneWidget);
+
+    await tester.tap(find.text('Test this control'));
+    expect(requestedProfile, isNotNull);
+    expect(
+      requestedProfile!.movementType,
+      CalibrationMovementType.indexFingerBend,
     );
   });
 
@@ -145,8 +166,9 @@ Future<void> _pumpReading(
   WidgetTester tester,
   FingerMovementReading reading,
   CalibrationSetupContext setupContext,
-  DateTime completedAt,
-) {
+  DateTime completedAt, {
+  ValueChanged<CalibrationProfile>? onControlTestRequested,
+}) {
   return tester.pumpWidget(
     MaterialApp(
       home: Scaffold(
@@ -156,6 +178,7 @@ Future<void> _pumpReading(
             movementType: CalibrationMovementType.indexFingerBend,
             setupContext: setupContext,
             now: () => completedAt,
+            onControlTestRequested: onControlTestRequested,
           ),
         ),
       ),

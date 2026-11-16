@@ -61,7 +61,8 @@ class MotionInputControllerConfig {
 /// [MotionInputEventType.primaryAction]. The controller must observe release
 /// before another activation can occur.
 class MotionInputController {
-  MotionInputController({required this.config});
+  MotionInputController({required this.config, bool initiallyArmed = true})
+    : _requiresReleaseBeforeActivation = !initiallyArmed;
 
   final MotionInputControllerConfig config;
 
@@ -70,11 +71,14 @@ class MotionInputController {
   Duration? _lastInputTimestamp;
   Duration? _lastValidTimestamp;
   Duration? _lastActivationTimestamp;
-  bool _requiresReleaseBeforeActivation = false;
+  bool _requiresReleaseBeforeActivation;
 
   MotionActionState get state => _state;
   bool get isPressed => _state == MotionActionState.pressed;
   MotionTrackingState get trackingState => _trackingState;
+  bool get isArmed =>
+      _trackingState == MotionTrackingState.available &&
+      !_requiresReleaseBeforeActivation;
 
   List<MotionInputEvent> accept({
     required double signal,

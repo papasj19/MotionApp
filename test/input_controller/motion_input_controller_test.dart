@@ -275,5 +275,34 @@ void main() {
         MotionInputEventType.primaryAction,
       ]);
     });
+
+    test('a long hold at varying frame intervals emits only once', () {
+      final allEvents = <MotionInputEvent>[];
+
+      for (final (milliseconds, signal) in [
+        (0, 12.0),
+        (17, 13.0),
+        (83, 14.0),
+        (260, 12.0),
+        (499, 11.0),
+        (740, 3.0),
+      ]) {
+        allEvents.addAll(
+          controller.accept(
+            signal: signal,
+            timestamp: Duration(milliseconds: milliseconds),
+          ),
+        );
+      }
+
+      expect(
+        allEvents.where(
+          (event) => event.type == MotionInputEventType.primaryAction,
+        ),
+        hasLength(1),
+      );
+      expect(allEvents.last.type, MotionInputEventType.actionUp);
+      expect(controller.isPressed, isFalse);
+    });
   });
 }

@@ -21,6 +21,7 @@ class CalibrationPanel extends StatefulWidget {
     required this.movementType,
     required this.setupContext,
     this.now,
+    this.onControlTestRequested,
     super.key,
   });
 
@@ -28,6 +29,7 @@ class CalibrationPanel extends StatefulWidget {
   final CalibrationMovementType movementType;
   final CalibrationSetupContext setupContext;
   final DateTime Function()? now;
+  final ValueChanged<CalibrationProfile>? onControlTestRequested;
 
   @override
   State<CalibrationPanel> createState() => _CalibrationPanelState();
@@ -487,6 +489,14 @@ class _CalibrationPanelState extends State<CalibrationPanel> {
               'Nice job! This setting stays within the movement measured today.',
         ),
         const SizedBox(height: 12),
+        if (widget.onControlTestRequested != null) ...[
+          FilledButton.icon(
+            onPressed: () => widget.onControlTestRequested!(profile),
+            icon: const Icon(Icons.play_arrow),
+            label: const Text('Test this control'),
+          ),
+          const SizedBox(height: 8),
+        ],
         OutlinedButton.icon(
           onPressed: _startBaseline,
           icon: const Icon(Icons.restart_alt),
