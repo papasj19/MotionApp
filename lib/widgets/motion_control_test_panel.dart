@@ -13,6 +13,9 @@ class MotionControlTestPanel extends StatefulWidget {
     required this.reading,
     required this.onRecalibrate,
     this.enableSyntheticInput = false,
+    this.framesPerSecond = 0,
+    this.processingLatency,
+    this.droppedFrames = 0,
     super.key,
   });
 
@@ -20,6 +23,9 @@ class MotionControlTestPanel extends StatefulWidget {
   final MovementMeasurement reading;
   final VoidCallback onRecalibrate;
   final bool enableSyntheticInput;
+  final double framesPerSecond;
+  final Duration? processingLatency;
+  final int droppedFrames;
 
   @override
   State<MotionControlTestPanel> createState() => _MotionControlTestPanelState();
@@ -29,8 +35,13 @@ class _MotionControlTestPanelState extends State<MotionControlTestPanel> {
   late CalibratedMotionController _controller;
   double? _signal;
   int _actionCount = 0;
+  int _readingCount = 0;
+  int _validReadingCount = 0;
   MotionInputEventType? _lastEvent;
   Duration? _lastSyntheticTimestamp;
+  Duration? _movementOnsetTimestamp;
+  final List<Duration> _signalToActionTimes = [];
+  final List<Duration> _processingLatencies = [];
 
   @override
   void initState() {
@@ -54,16 +65,45 @@ class _MotionControlTestPanelState extends State<MotionControlTestPanel> {
     _controller = CalibratedMotionController(profile: widget.profile);
     _signal = null;
     _actionCount = 0;
+    _readingCount = 0;
+    _validReadingCount = 0;
     _lastEvent = null;
     _lastSyntheticTimestamp = null;
+    _movementOnsetTimestamp = null;
+    _signalToActionTimes.clear();
+    _processingLatencies.clear();
   }
 
   void _accept(MovementMeasurement reading) {
     _signal = _controller.signalFor(reading);
+    _readingCount += 1;
+    if (_signal != null) {
+      _validReadingCount += 1;
+    }
+    final processingLatency = widget.processingLatency;
+    if (processingLatency != null && !processingLatency.isNegative) {
+      _processingLatencies.add(processingLatency);
+    }
+    final signal = _signal;
+    if (signal == null) {
+      _movementOnsetTimestamp = null;
+    } else if (signal < widget.profile.noiseFloorDegrees) {
+      _movementOnsetTimestamp = null;
+    } else if (_movementOnsetTimestamp == null &&
+        _controller.actionState == MotionActionState.released) {
+      _movementOnsetTimestamp = reading.timestamp;
+    }
+
     final events = _controller.accept(reading);
     for (final event in events) {
       if (event.type == MotionInputEventType.primaryAction) {
         _actionCount += 1;
+        final movementOnset = _movementOnsetTimestamp;
+        if (movementOnset != null && event.timestamp >= movementOnset) {
+          _signalToActionTimes.add(event.timestamp - movementOnset);
+        }
+      } else if (event.type == MotionInputEventType.trackingLost) {
+        _movementOnsetTimestamp = null;
       }
       _lastEvent = event.type;
     }
@@ -200,6 +240,27 @@ class _MotionControlTestPanelState extends State<MotionControlTestPanel> {
                   ],
                 ),
               ],
+              const SizedBox(height: 12),
+              ExpansionTile(
+                tilePadding: EdgeInsets.zero,
+                childrenPadding: const EdgeInsets.only(bottom: 8),
+                title: const Text(
+                  'Validation details',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                subtitle: const Text('Caregiver engineering checks'),
+                children: [
+                  _ValidationDetails(
+                    validReadingCount: _validReadingCount,
+                    readingCount: _readingCount,
+                    framesPerSecond: widget.framesPerSecond,
+                    processingLatency: _medianDuration(_processingLatencies),
+                    droppedFrames: widget.droppedFrames,
+                    signalToActionTime: _medianSignalToActionTime,
+                    signalToNoiseRatio: _signalToNoiseRatio,
+                  ),
+                ],
+              ),
               const SizedBox(height: 20),
               OutlinedButton.icon(
                 onPressed: widget.onRecalibrate,
@@ -211,6 +272,33 @@ class _MotionControlTestPanelState extends State<MotionControlTestPanel> {
         ),
       ),
     );
+  }
+
+  Duration? get _medianSignalToActionTime {
+    return _medianDuration(_signalToActionTimes);
+  }
+
+  Duration? _medianDuration(List<Duration> values) {
+    if (values.isEmpty) {
+      return null;
+    }
+    final microseconds =
+        values.map((duration) => duration.inMicroseconds).toList()..sort();
+    final middle = microseconds.length ~/ 2;
+    if (microseconds.length.isOdd) {
+      return Duration(microseconds: microseconds[middle]);
+    }
+    return Duration(
+      microseconds: (microseconds[middle - 1] + microseconds[middle]) ~/ 2,
+    );
+  }
+
+  double? get _signalToNoiseRatio {
+    final noise = widget.profile.noiseEstimateDegrees;
+    if (!noise.isFinite || noise <= 0) {
+      return null;
+    }
+    return widget.profile.comfortableAmplitudeDegrees / noise;
   }
 }
 
@@ -324,6 +412,78 @@ class _DetailRow extends StatelessWidget {
               textAlign: TextAlign.end,
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ValidationDetails extends StatelessWidget {
+  const _ValidationDetails({
+    required this.validReadingCount,
+    required this.readingCount,
+    required this.framesPerSecond,
+    required this.processingLatency,
+    required this.droppedFrames,
+    required this.signalToActionTime,
+    required this.signalToNoiseRatio,
+  });
+
+  final int validReadingCount;
+  final int readingCount;
+  final double framesPerSecond;
+  final Duration? processingLatency;
+  final int droppedFrames;
+  final Duration? signalToActionTime;
+  final double? signalToNoiseRatio;
+
+  @override
+  Widget build(BuildContext context) {
+    final validPercent = readingCount == 0
+        ? 0
+        : (validReadingCount * 100 / readingCount).round();
+    final latency = processingLatency;
+    final actionTime = signalToActionTime;
+    final ratio = signalToNoiseRatio;
+    return Semantics(
+      container: true,
+      label: 'Caregiver validation details.',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _DetailRow(
+            label: 'Valid tracking samples',
+            value: '$validReadingCount/$readingCount ($validPercent%)',
+          ),
+          _DetailRow(
+            label: 'Detection rate',
+            value: '${framesPerSecond.toStringAsFixed(1)} FPS',
+          ),
+          _DetailRow(
+            label: 'Processing delay median',
+            value: latency == null
+                ? 'Not available'
+                : '${latency.inMilliseconds} ms',
+          ),
+          _DetailRow(label: 'Dropped frames', value: '$droppedFrames'),
+          _DetailRow(
+            label: 'Observed signal/noise',
+            value: ratio == null
+                ? 'Not available'
+                : '${ratio.toStringAsFixed(1)}×',
+          ),
+          _DetailRow(
+            label: 'Signal rise to action',
+            value: actionTime == null
+                ? 'Complete an action'
+                : '${actionTime.inMilliseconds} ms median',
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'These are engineering diagnostics, not clinical measurements. '
+            'Signal timing starts when the camera estimate rises above the '
+            'measured noise floor; it is not a measurement of physical reaction time.',
           ),
         ],
       ),

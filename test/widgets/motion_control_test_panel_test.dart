@@ -72,6 +72,46 @@ void main() {
     expect(recalibrated, isTrue);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('shows caregiver validation diagnostics and action timing', (
+    tester,
+  ) async {
+    await _pumpPanel(
+      tester,
+      profile,
+      _reading(0, 20),
+      framesPerSecond: 24,
+      processingLatency: const Duration(milliseconds: 42),
+      droppedFrames: 3,
+    );
+    await _pumpPanel(
+      tester,
+      profile,
+      _reading(100, 23),
+      framesPerSecond: 24,
+      processingLatency: const Duration(milliseconds: 42),
+      droppedFrames: 3,
+    );
+    await _pumpPanel(
+      tester,
+      profile,
+      _reading(180, 30),
+      framesPerSecond: 24,
+      processingLatency: const Duration(milliseconds: 42),
+      droppedFrames: 3,
+    );
+
+    await tester.ensureVisible(find.text('Validation details'));
+    await tester.tap(find.text('Validation details'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('3/3 (100%)'), findsOneWidget);
+    expect(find.text('24.0 FPS'), findsOneWidget);
+    expect(find.text('42 ms'), findsOneWidget);
+    expect(find.text('3'), findsOneWidget);
+    expect(find.text('15.0×'), findsOneWidget);
+    expect(find.text('80 ms median'), findsOneWidget);
+  });
 }
 
 Future<void> _pumpPanel(
@@ -79,6 +119,9 @@ Future<void> _pumpPanel(
   CalibrationProfile profile,
   MovementMeasurement reading, {
   bool enableSyntheticInput = false,
+  double framesPerSecond = 0,
+  Duration? processingLatency,
+  int droppedFrames = 0,
   VoidCallback? onRecalibrate,
 }) {
   return tester.pumpWidget(
@@ -91,6 +134,9 @@ Future<void> _pumpPanel(
             profile: profile,
             reading: reading,
             enableSyntheticInput: enableSyntheticInput,
+            framesPerSecond: framesPerSecond,
+            processingLatency: processingLatency,
+            droppedFrames: droppedFrames,
             onRecalibrate: onRecalibrate ?? () {},
           ),
         ),

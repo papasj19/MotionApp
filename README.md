@@ -6,16 +6,17 @@ a simple, reusable game control.
 
 ## Current scope
 
-Stage 5 provides a caregiver-guided, in-memory calibration workflow over the
-Stage 4 index-finger signal. It measures comfortable rest variation, observes
-one intentional movement, detects direction and recommends a threshold only
-when the movement is distinguishable from normal signal variation. The
-caregiver can review direction and sensitivity, retry either measurement, or
-use a validated manual fallback when the movement still exceeds measured noise.
+The app currently tracks index-finger bend, wrist bend and left/right head tilt.
+A caregiver-guided calibration measures comfortable rest variation and one
+intentional movement before creating a game-independent one-button controller.
+The Control Test verifies rearming, tracking loss and one-action-per-movement
+behavior without running a game.
 
-The resulting calibration stays in memory. The app does not yet create a live
-controller signal, recognize a game gesture, run a game, save a profile or
-support a second tracked movement type. Those remain separate later stages.
+Stage 7 adds caregiver validation diagnostics, a repeatable real-device
+protocol and synthetic acceptance scenarios. Real Android and iPhone/iPad
+observations are still pending and must be recorded before the controller is
+treated as game-ready. Calibration remains in memory; games, student profiles,
+session persistence and results are not implemented.
 
 ## Architecture
 
@@ -37,6 +38,11 @@ camera frames -> MediaPipe adapter -> HandObservation -> skeleton overlay
                                                                         |
                                                                         +-> in-memory
                                                                             profile
+                                                                                  |
+                                                                                  +-> universal
+                                                                                      input events
+                                                                                           |
+                                                                                           +-> Control Test
 ```
 
 `HandObservation` is an app-owned type containing a timestamp, 21 normalized
@@ -130,6 +136,19 @@ includes movement type, degrees, baseline, noise estimate, noise floor,
 threshold, direction, timestamps, threshold source, camera facing, preview
 mirroring and device orientation. It is not persisted.
 
+## Stage 6 controller and Stage 7 validation gate
+
+All supported movements are converted into the same direction-normalized
+signal and universal action events. Hysteresis requires a return to rest before
+another action, while tracking loss safely releases a held action and requires
+rest after recovery. Camera and MediaPipe types remain outside this controller.
+
+The Control Test exposes a collapsed caregiver validation section with valid
+tracking samples, detection rate, processing delay, dropped frames, observed
+signal/noise and signal-rise-to-action timing. The executable device protocol
+and blank worksheet are in `validation/STAGE_07_DEVICE_VALIDATION.md`. No
+real-device result is claimed until that worksheet is completed on hardware.
+
 ## Hand-tracking technology decision
 
 Stage 3 uses Google's maintained `mediapipe_vision` Flutter package, pinned to
@@ -188,9 +207,9 @@ flutter devices
 flutter run -d <device-id>
 ```
 
-On the comfortable calibration screen, check that:
+On the selected movement's calibration screen, check that:
 
-1. The start button is available only while one hand is tracked.
+1. The start button is available only while the selected body area is tracked.
 2. Resting comfortably for about two seconds completes step 1.
 3. One comfortable bend or straighten movement completes step 2 without any
    request for a maximum range.
@@ -209,8 +228,9 @@ rounded values to avoid implying clinical or millimeter precision.
 
 Useful debugger breakpoints are `IndexFingerMovementAnalyzer.analyze` for each
 accepted sample, `BaselineCalibrationSession.accept` for rest measurement,
-`ComfortableMovementCalibrationSession.accept` for movement separation and
-`CalibrationProfileEditor.validate` for caregiver settings.
+`ComfortableMovementCalibrationSession.accept` for movement separation,
+`CalibrationProfileEditor.validate` for caregiver settings and
+`MotionInputController.accept` for controller events.
 
 Android release lint with Android Gradle Plugin 9.3 requires a JDK 21 runtime;
 debug builds work with the Android Studio JDK 17 bundled on the development

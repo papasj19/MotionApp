@@ -341,6 +341,9 @@ class _CameraScreenState extends State<CameraScreen>
                         onRecalibrate: _recalibrate,
                         enableSyntheticInput:
                             widget.enableSyntheticControllerInput,
+                        framesPerSecond: trackingUpdate?.framesPerSecond ?? 0,
+                        processingLatency: trackingUpdate?.processingLatency,
+                        droppedFrames: trackingUpdate?.droppedFrames ?? 0,
                       )
                     else if (movementReading != null)
                       CalibrationPanel(
