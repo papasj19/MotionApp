@@ -74,6 +74,27 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('opens the game only when a play callback is provided', (
+    tester,
+  ) async {
+    var playRequests = 0;
+    await _pumpPanel(
+      tester,
+      profile,
+      _reading(0, 20),
+      onPlayGameRequested: () => playRequests += 1,
+    );
+
+    await tester.ensureVisible(
+      find.byKey(const Key('play-game-with-motion-control')),
+    );
+    await tester.tap(find.byKey(const Key('play-game-with-motion-control')));
+    await tester.pump();
+
+    expect(playRequests, 1);
+    expect(find.text('Play Sky Sprint with this control'), findsOneWidget);
+  });
+
   testWidgets('shows caregiver validation diagnostics and action timing', (
     tester,
   ) async {
@@ -146,6 +167,7 @@ Future<void> _pumpPanel(
   Duration? processingLatency,
   int droppedFrames = 0,
   VoidCallback? onRecalibrate,
+  VoidCallback? onPlayGameRequested,
   Locale locale = const Locale('en'),
 }) {
   return tester.pumpWidget(
@@ -162,6 +184,7 @@ Future<void> _pumpPanel(
             processingLatency: processingLatency,
             droppedFrames: droppedFrames,
             onRecalibrate: onRecalibrate ?? () {},
+            onPlayGameRequested: onPlayGameRequested,
           ),
         ),
       ),

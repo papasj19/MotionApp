@@ -795,6 +795,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gamePaused => 'Paused';
 
   @override
+  String get gameMotionControlReady => 'Motion control ready';
+
+  @override
+  String get gameMotionReadyInstruction =>
+      'Use your calibrated movement to make Joybit fly.';
+
+  @override
+  String get gameMotionReturnToRest => 'Return comfortably to rest';
+
+  @override
+  String get gameMotionReturnToRestInstruction =>
+      'The game will resume when the movement control is ready.';
+
+  @override
+  String get gameMotionTrackingPaused => 'Tracking paused';
+
+  @override
+  String get gameMotionTrackingPausedInstruction =>
+      'Reposition the tracked body area. The game will wait safely.';
+
+  @override
+  String get playGameWithControl => 'Play Sky Sprint with this control';
+
+  @override
   String get gamePauseTooltip => 'Pause game';
 
   @override

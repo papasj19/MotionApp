@@ -2,6 +2,11 @@ enum ArcadeInputAction { primaryAction }
 
 enum ArcadeInputSource { motion, touch, keyboard }
 
+/// Camera-free status for a calibrated motion input source.
+///
+/// Games can respond safely without knowing how tracking or calibration works.
+enum ArcadeMotionInputStatus { ready, returnToRest, trackingLost }
+
 class ArcadeInputEvent {
   const ArcadeInputEvent({
     required this.action,

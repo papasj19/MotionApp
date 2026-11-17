@@ -1263,6 +1263,48 @@ abstract class AppLocalizations {
   /// **'Paused'**
   String get gamePaused;
 
+  /// No description provided for @gameMotionControlReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Motion control ready'**
+  String get gameMotionControlReady;
+
+  /// No description provided for @gameMotionReadyInstruction.
+  ///
+  /// In en, this message translates to:
+  /// **'Use your calibrated movement to make Joybit fly.'**
+  String get gameMotionReadyInstruction;
+
+  /// No description provided for @gameMotionReturnToRest.
+  ///
+  /// In en, this message translates to:
+  /// **'Return comfortably to rest'**
+  String get gameMotionReturnToRest;
+
+  /// No description provided for @gameMotionReturnToRestInstruction.
+  ///
+  /// In en, this message translates to:
+  /// **'The game will resume when the movement control is ready.'**
+  String get gameMotionReturnToRestInstruction;
+
+  /// No description provided for @gameMotionTrackingPaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Tracking paused'**
+  String get gameMotionTrackingPaused;
+
+  /// No description provided for @gameMotionTrackingPausedInstruction.
+  ///
+  /// In en, this message translates to:
+  /// **'Reposition the tracked body area. The game will wait safely.'**
+  String get gameMotionTrackingPausedInstruction;
+
+  /// No description provided for @playGameWithControl.
+  ///
+  /// In en, this message translates to:
+  /// **'Play Sky Sprint with this control'**
+  String get playGameWithControl;
+
   /// No description provided for @gamePauseTooltip.
   ///
   /// In en, this message translates to:

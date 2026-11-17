@@ -14,12 +14,14 @@ class FlapToFlyGameState extends ChangeNotifier {
   int _actionCount = 0;
   int _score = 0;
   bool _paused = false;
+  bool _inputSuspended = false;
   FlapToFlyRunStatus _runStatus = FlapToFlyRunStatus.ready;
   ArcadeInputSource? _lastInputSource;
 
   int get actionCount => _actionCount;
   int get score => _score;
   bool get paused => _paused;
+  bool get inputSuspended => _inputSuspended;
   FlapToFlyRunStatus get runStatus => _runStatus;
   ArcadeInputSource? get lastInputSource => _lastInputSource;
 
@@ -48,6 +50,14 @@ class FlapToFlyGameState extends ChangeNotifier {
       return;
     }
     _paused = paused;
+    notifyListeners();
+  }
+
+  void setInputSuspended(bool suspended) {
+    if (_inputSuspended == suspended) {
+      return;
+    }
+    _inputSuspended = suspended;
     notifyListeners();
   }
 
@@ -147,7 +157,27 @@ class FlapToFlyGame extends FlameGame with KeyboardEvents {
       return;
     }
     gameState.setPaused(false);
-    resumeEngine();
+    if (!gameState.inputSuspended) {
+      resumeEngine();
+    }
+  }
+
+  void suspendForInput() {
+    if (gameState.inputSuspended) {
+      return;
+    }
+    gameState.setInputSuspended(true);
+    pauseEngine();
+  }
+
+  void resumeAfterInput() {
+    if (!gameState.inputSuspended) {
+      return;
+    }
+    gameState.setInputSuspended(false);
+    if (!gameState.paused) {
+      resumeEngine();
+    }
   }
 
   void restartGame() {
@@ -157,6 +187,9 @@ class FlapToFlyGame extends FlameGame with KeyboardEvents {
     _pulseRemaining = 0;
     mechanics.restart();
     gameState.resetFrom(mechanics);
+    if (gameState.inputSuspended) {
+      pauseEngine();
+    }
   }
 
   @override
@@ -185,6 +218,7 @@ class FlapToFlyGame extends FlameGame with KeyboardEvents {
 
   void _handleInput(ArcadeInputEvent event) {
     if (gameState.paused ||
+        gameState.inputSuspended ||
         mechanics.status == FlapToFlyRunStatus.gameOver ||
         event.action != ArcadeInputAction.primaryAction) {
       return;

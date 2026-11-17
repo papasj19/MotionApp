@@ -14,6 +14,7 @@ class MotionControlTestPanel extends StatefulWidget {
     required this.profile,
     required this.reading,
     required this.onRecalibrate,
+    this.onPlayGameRequested,
     this.enableSyntheticInput = false,
     this.framesPerSecond = 0,
     this.processingLatency,
@@ -24,6 +25,7 @@ class MotionControlTestPanel extends StatefulWidget {
   final CalibrationProfile profile;
   final MovementMeasurement reading;
   final VoidCallback onRecalibrate;
+  final VoidCallback? onPlayGameRequested;
   final bool enableSyntheticInput;
   final double framesPerSecond;
   final Duration? processingLatency;
@@ -250,6 +252,22 @@ class _MotionControlTestPanelState extends State<MotionControlTestPanel> {
                       label: Text(localizations.testRelease),
                     ),
                   ],
+                ),
+              ],
+              if (widget.onPlayGameRequested != null) ...[
+                const SizedBox(height: 20),
+                FilledButton.icon(
+                  key: const Key('play-game-with-motion-control'),
+                  onPressed: widget.onPlayGameRequested,
+                  icon: const Icon(Icons.rocket_launch_rounded),
+                  label: Text(localizations.playGameWithControl),
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size.fromHeight(64),
+                    textStyle: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
                 ),
               ],
               const SizedBox(height: 12),

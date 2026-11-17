@@ -169,19 +169,31 @@ semantic states so internal diagnostic sentences do not leak into the
 interface. New screens must add matching entries to both ARB catalogs and test
 both locales before they are considered complete.
 
-## Stage 9A game foundation
+## Stage 9 game integration
 
 The Quick Play screen includes a bilingual preview of the first original game,
-**Sky Sprint**. Its Flame shell renders an original pixel-style Joybit flyer and
-accepts the same primary arcade action from a large touch button or the Space
-and Enter keys. Pause, resume, restart and exit are available without requiring
-a camera, so the game boundary can be tested independently.
+**Sky Sprint**. Its Flame shell renders an original pixel-style Joybit flyer
+with deterministic gravity, obstacles, collision, scoring and restart. The
+same primary arcade action can come from a large touch button, the Space and
+Enter keys, or a validated calibrated movement. Pause, resume, restart and exit
+remain available without requiring a camera, so the game boundary can still be
+tested independently.
 
 `ArcadeInputController` is the camera-free contract used by the game. The
 `MotionArcadeInputAdapter` forwards only Stage 6 one-shot primary events;
 action-down, action-up and tracking-state events cannot create duplicate game
-actions. Stage 9A does not connect live calibrated movement to the preview and
-does not yet include gravity, obstacles, collision, scores or saved sessions.
+actions. `CalibratedArcadeInputSession` keeps the selected calibration as
+in-memory movement-session context while exposing only camera-free game input.
+Tracking loss suspends play, and recovery requires a comfortable return to rest
+before the game resumes. Game score remains separate from physical movement
+data and is not presented as motor improvement. Sessions are not persisted yet.
+
+Game difficulty and physical control sensitivity must remain independent.
+`FlapToFlyConfig` already isolates game-only values such as gravity, obstacle
+speed, spacing and gap size. Sky Sprint's current values remain unchanged for
+the POC. Before additional games or caregiver difficulty controls are added,
+define clear presets such as slower speed and larger gaps, test every preset,
+and never automatically require a larger physical movement from a child.
 
 ## Hand-tracking technology decision
 

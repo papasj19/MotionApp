@@ -809,6 +809,30 @@ class AppLocalizationsEs extends AppLocalizations {
   String get gamePaused => 'En pausa';
 
   @override
+  String get gameMotionControlReady => 'Control por movimiento listo';
+
+  @override
+  String get gameMotionReadyInstruction =>
+      'Usa tu movimiento calibrado para hacer volar a Joybit.';
+
+  @override
+  String get gameMotionReturnToRest => 'Vuelve cómodamente al reposo';
+
+  @override
+  String get gameMotionReturnToRestInstruction =>
+      'El juego se reanudará cuando el control por movimiento esté listo.';
+
+  @override
+  String get gameMotionTrackingPaused => 'Seguimiento en pausa';
+
+  @override
+  String get gameMotionTrackingPausedInstruction =>
+      'Vuelve a colocar la zona del cuerpo seguida. El juego esperará de forma segura.';
+
+  @override
+  String get playGameWithControl => 'Jugar a Carrera Celeste con este control';
+
+  @override
   String get gamePauseTooltip => 'Pausar el juego';
 
   @override

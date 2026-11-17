@@ -361,6 +361,13 @@
     "placeholders": {"score": {"type": "int"}}
   },
   "gamePaused": "Paused",
+  "gameMotionControlReady": "Motion control ready",
+  "gameMotionReadyInstruction": "Use your calibrated movement to make Joybit fly.",
+  "gameMotionReturnToRest": "Return comfortably to rest",
+  "gameMotionReturnToRestInstruction": "The game will resume when the movement control is ready.",
+  "gameMotionTrackingPaused": "Tracking paused",
+  "gameMotionTrackingPausedInstruction": "Reposition the tracked body area. The game will wait safely.",
+  "playGameWithControl": "Play Sky Sprint with this control",
   "gamePauseTooltip": "Pause game",
   "gameResumeTooltip": "Resume game",
   "gameRestartTooltip": "Restart game",

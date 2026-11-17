@@ -4,6 +4,7 @@ import 'package:camera/camera.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../calibration/calibration_profile.dart';
+import '../game/input/calibrated_arcade_input_session.dart';
 import '../hand_tracking/hand_tracking_service.dart';
 import '../hand_tracking/mediapipe_hand_tracking_service.dart';
 import '../l10n/app_localizations.dart';
@@ -17,6 +18,7 @@ import '../theme/arcade_theme.dart';
 import '../widgets/calibration_panel.dart';
 import '../widgets/hand_skeleton_overlay.dart';
 import '../widgets/motion_control_test_panel.dart';
+import 'flap_to_fly_screen.dart';
 
 enum _CameraViewState {
   initializing,
@@ -83,6 +85,7 @@ class _CameraScreenState extends State<CameraScreen>
   Future<void>? _pauseOperation;
   Orientation? _lastOrientation;
   Timer? _orientationRestartTimer;
+  CalibratedArcadeInputSession? _activeGameInputSession;
 
   @override
   void initState() {
@@ -219,6 +222,7 @@ class _CameraScreenState extends State<CameraScreen>
   }
 
   Future<void> _restartCameraForOrientationChange() async {
+    await _closeActiveMotionGame();
     final restartId = ++_requestId;
     _isInitializing = false;
     if (mounted) {
@@ -243,6 +247,7 @@ class _CameraScreenState extends State<CameraScreen>
   }
 
   Future<void> _pauseCamera() async {
+    _activeGameInputSession?.markTrackingUnavailable();
     _requestId += 1;
     _isInitializing = false;
     if (mounted) {
@@ -261,6 +266,7 @@ class _CameraScreenState extends State<CameraScreen>
   Future<void> _resumeCamera() async {
     await _pauseOperation;
     _pauseOperation = null;
+    await _closeActiveMotionGame();
     if (mounted && _isAppActive && _selectedMovementType != null) {
       await _initializeCamera();
     }
@@ -272,6 +278,8 @@ class _CameraScreenState extends State<CameraScreen>
     _orientationRestartTimer?.cancel();
     _isAppActive = false;
     _requestId += 1;
+    _activeGameInputSession?.dispose();
+    _activeGameInputSession = null;
     final subscription = _trackingSubscription;
     _trackingSubscription = null;
     unawaited(subscription?.cancel());
@@ -372,6 +380,8 @@ class _CameraScreenState extends State<CameraScreen>
                         framesPerSecond: trackingUpdate?.framesPerSecond ?? 0,
                         processingLatency: trackingUpdate?.processingLatency,
                         droppedFrames: trackingUpdate?.droppedFrames ?? 0,
+                        onPlayGameRequested: () =>
+                            _startMotionGame(controlTestProfile),
                       )
                     else if (movementReading != null)
                       CalibrationPanel(
@@ -427,6 +437,7 @@ class _CameraScreenState extends State<CameraScreen>
         };
     _trackingService = service;
     _trackingSubscription = service.updates.listen((update) {
+      _activeGameInputSession?.accept(update.reading);
       if (mounted) {
         setState(() {
           _trackingUpdate = update;
@@ -486,6 +497,45 @@ class _CameraScreenState extends State<CameraScreen>
 
   void _recalibrate() {
     setState(() => _controlTestProfile = null);
+  }
+
+  Future<void> _startMotionGame(CalibrationProfile profile) async {
+    if (_activeGameInputSession != null) {
+      return;
+    }
+    final session = CalibratedArcadeInputSession(profile: profile);
+    _activeGameInputSession = session;
+    final currentReading = _movementReading;
+    if (currentReading != null) {
+      session.accept(currentReading);
+    }
+
+    try {
+      await Navigator.of(context).push<void>(
+        MaterialPageRoute<void>(
+          builder: (_) => FlapToFlyScreen(
+            inputController: session.arcadeInput,
+            motionInputStatus: session.motionStatus,
+          ),
+        ),
+      );
+    } finally {
+      if (identical(_activeGameInputSession, session)) {
+        _activeGameInputSession = null;
+      }
+      session.dispose();
+    }
+  }
+
+  Future<void> _closeActiveMotionGame() async {
+    final session = _activeGameInputSession;
+    if (session == null) {
+      return;
+    }
+    session.markTrackingUnavailable();
+    if (mounted && ModalRoute.of(context)?.isCurrent == false) {
+      await Navigator.of(context).maybePop();
+    }
   }
 }
 

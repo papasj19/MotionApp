@@ -12,17 +12,17 @@ class CalibratedMotionController {
     Duration cooldown = Duration.zero,
     Duration maximumTrackingGap = const Duration(milliseconds: 500),
   }) : _controller = MotionInputController(
-         config: MotionInputControllerConfig(
-           activationThreshold: profile.thresholdOffsetDegrees,
-           releaseThreshold:
-               profile.thresholdOffsetDegrees * releaseThresholdRatio,
-           cooldown: cooldown,
-           maximumTrackingGap: maximumTrackingGap,
-         ),
-         // Calibration commonly ends while the movement is still held.
-         // Requiring rest first prevents an action when the test opens.
-         initiallyArmed: false,
-       ) {
+          config: MotionInputControllerConfig(
+            activationThreshold: profile.thresholdOffsetDegrees,
+            releaseThreshold:
+                profile.thresholdOffsetDegrees * releaseThresholdRatio,
+            cooldown: cooldown,
+            maximumTrackingGap: maximumTrackingGap,
+          ),
+          // Calibration commonly ends while the movement is still held.
+          // Requiring rest first prevents an action when the test opens.
+          initiallyArmed: false,
+        ) {
     if (!releaseThresholdRatio.isFinite ||
         releaseThresholdRatio < 0 ||
         releaseThresholdRatio >= 1) {
@@ -63,5 +63,9 @@ class CalibratedMotionController {
 
   List<MotionInputEvent> checkForStaleTracking(Duration timestamp) {
     return _controller.checkForStaleTracking(timestamp: timestamp);
+  }
+
+  List<MotionInputEvent> markTrackingLost(Duration timestamp) {
+    return _controller.markTrackingLost(timestamp: timestamp);
   }
 }
