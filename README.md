@@ -13,10 +13,11 @@ The Control Test verifies rearming, tracking loss and one-action-per-movement
 behavior without running a game.
 
 Stage 7 adds caregiver validation diagnostics, a repeatable real-device
-protocol and synthetic acceptance scenarios. Real Android and iPhone/iPad
-observations are still pending and must be recorded before the controller is
-treated as game-ready. Calibration remains in memory; games, student profiles,
-session persistence and results are not implemented.
+protocol and synthetic acceptance scenarios. One adult tester reported a pass
+of the minimum core checklist on a physical Android device at commit `2da9fae`
+on 2026-11-17. Quantitative diagnostics, the broader device/condition matrix
+and iPhone/iPad observations remain pending. Calibration remains in memory;
+games, student profiles, session persistence and results are not implemented.
 
 ## Architecture
 
@@ -146,8 +147,22 @@ rest after recovery. Camera and MediaPipe types remain outside this controller.
 The Control Test exposes a collapsed caregiver validation section with valid
 tracking samples, detection rate, processing delay, dropped frames, observed
 signal/noise and signal-rise-to-action timing. The executable device protocol
-and blank worksheet are in `validation/STAGE_07_DEVICE_VALIDATION.md`. No
-real-device result is claimed until that worksheet is completed on hardware.
+and worksheet are in `validation/STAGE_07_DEVICE_VALIDATION.md`. The recorded
+Android POC pass covers the core observable behaviors; unrecorded quantitative
+fields and additional device conditions remain explicitly pending.
+
+## Localization foundation
+
+Flutter's generated localization system is configured with English as the
+source catalog in `lib/l10n/app_en.arb`. The app follows supported device
+locales and falls back to English. Quick Play is the first fully extracted
+flow, including visible copy, tooltips and screen-reader descriptions.
+
+No second language has been selected yet, and the remaining screens still need
+their user-facing copy extracted. Services and calibration models that
+currently produce English sentences should eventually return semantic status
+values so the interface can translate them without mixing language into motion
+logic.
 
 ## Hand-tracking technology decision
 

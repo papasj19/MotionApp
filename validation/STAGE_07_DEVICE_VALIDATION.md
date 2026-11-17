@@ -1,13 +1,37 @@
 # Stage 7 — Real-device validation protocol and worksheet
 
-Status: **device observations pending**. No phone or tablet measurements were
-performed on 2026-11-16. Automated analysis and synthetic controller checks do
-not prove real-camera reliability.
+Status: **POC Android core run passed; broader device matrix pending**. One
+adult tester reported completing the minimum fixed-camera checklist on a
+physical Android device on 2026-11-17 using app commit `2da9fae`.
 
 ## Observed results
 
-None yet. Hardware was unavailable for this stage pass, so every device,
-lighting, distance, orientation and occlusion result remains **pending**.
+The tester reported that every observable pass condition in the minimum test
+was met:
+
+| Check | Reported result |
+|---|---|
+| Camera access, framing and upright preview | Pass |
+| Comfortable rest and movement calibration | Pass |
+| Tracking loss reported as paused rather than failure | Pass |
+| 30 seconds of stillness | 0 accidental actions |
+| 10 comfortable movements | 10 detected, 0 missed, 0 extra |
+| Three five-second holds | One action per hold |
+| Five tracking-loss and recovery attempts | No action on loss or recovery |
+| Portrait → landscape → portrait | Preview remained upright and calibration restarted |
+| Background and resume | Camera tracking resumed safely |
+| Change movement and return to lobby | Previous calibration and action count did not carry over |
+
+The tester was not an Android specialist, so this entry records the reported
+observable behavior rather than an independently witnessed laboratory run.
+Device model, Android version, selected movement, distance, lighting and the
+numeric validation details were not supplied. Valid-sample percentage, FPS,
+processing delay, signal rise time, signal/noise and dropped-frame results
+therefore remain **not recorded**.
+
+This pass is enough to continue POC development. It does not replace the
+condition matrix below, testing on additional Android hardware, iPhone/iPad
+testing or later testing with representative users and caregivers.
 
 This is an engineering quality gate, not a clinical assessment. Angles are
 camera estimates in degrees, not millimetres or medical measurements. Never ask

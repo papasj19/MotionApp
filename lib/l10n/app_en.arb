@@ -1,0 +1,81 @@
+{
+  "@@locale": "en",
+  "appTitle": "Adaptive Motion Arcade",
+  "@appTitle": {
+    "description": "The application name shown by Flutter."
+  },
+  "arcadeLobbyTooltip": "Arcade lobby",
+  "@arcadeLobbyTooltip": {
+    "description": "Tooltip for returning to the main arcade lobby."
+  },
+  "quickPlayTitle": "Quick Play",
+  "@quickPlayTitle": {
+    "description": "Title of the quick-play setup screen."
+  },
+  "quickPlayChooseMovementStep": "STEP 1 • CHOOSE MOVEMENT",
+  "@quickPlayChooseMovementStep": {
+    "description": "First quick-play setup step. Preserve the meaning rather than the capitalization when translating."
+  },
+  "quickPlayComfortQuestion": "What feels comfortable today?",
+  "@quickPlayComfortQuestion": {
+    "description": "Heading inviting the player to choose a comfortable movement."
+  },
+  "quickPlayCompanionPrompt": "Pick one movement. We will measure what feels good today.",
+  "@quickPlayCompanionPrompt": {
+    "description": "Child-friendly companion guidance on the quick-play screen."
+  },
+  "movementHeadLabel": "Head",
+  "@movementHeadLabel": {
+    "description": "Label for head movement control."
+  },
+  "movementHeadDescription": "Tilt left or right",
+  "@movementHeadDescription": {
+    "description": "Short description of the supported head movement."
+  },
+  "movementWristLabel": "Hand / Wrist",
+  "@movementWristLabel": {
+    "description": "Label for wrist movement control."
+  },
+  "movementWristDescription": "Bend your wrist",
+  "@movementWristDescription": {
+    "description": "Short description of the supported wrist movement."
+  },
+  "movementFingerLabel": "Finger",
+  "@movementFingerLabel": {
+    "description": "Label for index-finger movement control."
+  },
+  "movementFingerDescription": "Bend your index finger",
+  "@movementFingerDescription": {
+    "description": "Short description of the supported finger movement."
+  },
+  "movementLegLabel": "Leg",
+  "@movementLegLabel": {
+    "description": "Label for a future leg movement control."
+  },
+  "movementLegDescription": "Planned for a later version",
+  "@movementLegDescription": {
+    "description": "Explanation that leg movement is not available yet."
+  },
+  "movementTileSemantics": "{label}. {description}.",
+  "@movementTileSemantics": {
+    "description": "Screen-reader description for a movement choice.",
+    "placeholders": {
+      "label": {
+        "type": "String",
+        "example": "Head"
+      },
+      "description": {
+        "type": "String",
+        "example": "Tilt left or right"
+      }
+    }
+  },
+  "comingLater": "COMING LATER",
+  "@comingLater": {
+    "description": "Badge for a feature that is not available yet. Preserve the meaning rather than the capitalization when translating."
+  },
+  "quickPlayComfortNote": "Choose what is comfortable now. The next step measures your movement—it never asks you to stretch farther.",
+  "@quickPlayComfortNote": {
+    "description": "Safety guidance that calibration uses comfortable movement rather than maximum range."
+  }
+}

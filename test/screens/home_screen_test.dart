@@ -1,3 +1,4 @@
+import 'package:adaptive_motion_arcade/l10n/app_localizations.dart';
 import 'package:adaptive_motion_arcade/screens/home_screen.dart';
 import 'package:adaptive_motion_arcade/screens/quick_play_screen.dart';
 import 'package:adaptive_motion_arcade/theme/arcade_theme.dart';
@@ -7,7 +8,7 @@ import 'package:material_ui/material_ui.dart';
 void main() {
   testWidgets('shows the responsive arcade lobby', (tester) async {
     await tester.pumpWidget(
-      MaterialApp(theme: buildArcadeTheme(), home: const HomeScreen()),
+      _localizedTestApp(home: const HomeScreen()),
     );
 
     expect(find.text('ADAPTIVE MOTION'), findsOneWidget);
@@ -23,8 +24,7 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        theme: buildArcadeTheme(),
+      _localizedTestApp(
         home: HomeScreen(
           cameraScreenBuilder: (_) =>
               const Scaffold(body: Text('Injected camera screen')),
@@ -49,7 +49,7 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(theme: buildArcadeTheme(), home: const HomeScreen()),
+      _localizedTestApp(home: const HomeScreen()),
     );
 
     await tester.tap(find.byKey(const Key('school-button')));
@@ -66,8 +66,7 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
 
     await tester.pumpWidget(
-      MaterialApp(
-        theme: buildArcadeTheme(),
+      _localizedTestApp(
         builder: (context, child) => MediaQuery(
           data: MediaQuery.of(
             context,
@@ -82,4 +81,17 @@ void main() {
     expect(find.text('Quick Play'), findsOneWidget);
     expect(find.text('School'), findsOneWidget);
   });
+}
+
+Widget _localizedTestApp({
+  required Widget home,
+  TransitionBuilder? builder,
+}) {
+  return MaterialApp(
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+    theme: buildArcadeTheme(),
+    builder: builder,
+    home: home,
+  );
 }

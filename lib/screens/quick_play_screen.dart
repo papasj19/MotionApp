@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../l10n/app_localizations.dart';
 import '../movement/movement_measurement.dart';
 import '../theme/arcade_theme.dart';
 import '../widgets/joybit_companion.dart';
@@ -12,14 +13,15 @@ class QuickPlayScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          tooltip: 'Arcade lobby',
+          tooltip: localizations.arcadeLobbyTooltip,
           onPressed: () => Navigator.of(context).pop(),
           icon: const Icon(Icons.home_rounded),
         ),
-        title: const Text('Quick Play'),
+        title: Text(localizations.quickPlayTitle),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -73,6 +75,7 @@ class _QuickPlayIntroduction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -85,9 +88,9 @@ class _QuickPlayIntroduction extends StatelessWidget {
               border: Border.all(color: ArcadeColors.electricCyan, width: 2),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Text(
-              'STEP 1 • CHOOSE MOVEMENT',
-              style: TextStyle(
+            child: Text(
+              localizations.quickPlayChooseMovementStep,
+              style: const TextStyle(
                 color: ArcadeColors.electricCyan,
                 fontWeight: FontWeight.w900,
                 letterSpacing: 0.8,
@@ -99,16 +102,16 @@ class _QuickPlayIntroduction extends StatelessWidget {
         Semantics(
           header: true,
           child: Text(
-            'What feels comfortable today?',
+            localizations.quickPlayComfortQuestion,
             style: Theme.of(
               context,
             ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900),
           ),
         ),
         const SizedBox(height: 12),
-        const JoybitCompanion(
+        JoybitCompanion(
           compact: true,
-          message: 'Pick one movement. We will measure what feels good today.',
+          message: localizations.quickPlayCompanionPrompt,
         ),
       ],
     );
@@ -122,13 +125,14 @@ class _MovementTileGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     return LayoutBuilder(
       builder: (context, constraints) {
         final columnCount = constraints.maxWidth >= 820
             ? 4
             : constraints.maxWidth >= 360
-            ? 2
-            : 1;
+                ? 2
+                : 1;
         const spacing = 14.0;
         final width =
             (constraints.maxWidth - spacing * (columnCount - 1)) / columnCount;
@@ -140,8 +144,8 @@ class _MovementTileGrid extends StatelessWidget {
               width: width,
               child: _MovementTile(
                 key: const Key('movement-head'),
-                label: 'Head',
-                description: 'Tilt left or right',
+                label: localizations.movementHeadLabel,
+                description: localizations.movementHeadDescription,
                 icon: Icons.face_rounded,
                 accent: ArcadeColors.arcadeYellow,
                 onTap: () => onSelected(CalibrationMovementType.headTilt),
@@ -151,8 +155,8 @@ class _MovementTileGrid extends StatelessWidget {
               width: width,
               child: _MovementTile(
                 key: const Key('movement-wrist'),
-                label: 'Hand / Wrist',
-                description: 'Bend your wrist',
+                label: localizations.movementWristLabel,
+                description: localizations.movementWristDescription,
                 icon: Icons.pan_tool_alt_rounded,
                 accent: ArcadeColors.softPink,
                 onTap: () => onSelected(CalibrationMovementType.wristBend),
@@ -162,8 +166,8 @@ class _MovementTileGrid extends StatelessWidget {
               width: width,
               child: _MovementTile(
                 key: const Key('movement-finger'),
-                label: 'Finger',
-                description: 'Bend your index finger',
+                label: localizations.movementFingerLabel,
+                description: localizations.movementFingerDescription,
                 icon: Icons.touch_app_rounded,
                 accent: ArcadeColors.electricCyan,
                 onTap: () =>
@@ -172,10 +176,10 @@ class _MovementTileGrid extends StatelessWidget {
             ),
             SizedBox(
               width: width,
-              child: const _MovementTile(
-                key: Key('movement-leg'),
-                label: 'Leg',
-                description: 'Planned for a later version',
+              child: _MovementTile(
+                key: const Key('movement-leg'),
+                label: localizations.movementLegLabel,
+                description: localizations.movementLegDescription,
                 icon: Icons.accessibility_new_rounded,
                 accent: ArcadeColors.lavender,
               ),
@@ -206,10 +210,11 @@ class _MovementTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final enabled = onTap != null;
+    final localizations = AppLocalizations.of(context);
     return Semantics(
       button: true,
       enabled: enabled,
-      label: '$label. $description.',
+      label: localizations.movementTileSemantics(label, description),
       child: Opacity(
         opacity: enabled ? 1 : 0.62,
         child: Container(
@@ -254,9 +259,9 @@ class _MovementTile extends StatelessWidget {
                         label,
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: accent,
-                          fontWeight: FontWeight.w900,
-                        ),
+                              color: accent,
+                              fontWeight: FontWeight.w900,
+                            ),
                       ),
                       const SizedBox(height: 6),
                       Text(description, textAlign: TextAlign.center),
@@ -281,6 +286,7 @@ class _LaterBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
@@ -288,9 +294,9 @@ class _LaterBadge extends StatelessWidget {
         border: Border.all(color: ArcadeColors.warmCream),
         borderRadius: BorderRadius.circular(6),
       ),
-      child: const Text(
-        'COMING LATER',
-        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900),
+      child: Text(
+        localizations.comingLater,
+        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w900),
       ),
     );
   }
@@ -301,6 +307,7 @@ class _ComfortNote extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -308,15 +315,14 @@ class _ComfortNote extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: ArcadeColors.royalPurple, width: 2),
       ),
-      child: const Row(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.favorite_rounded, color: ArcadeColors.softPink),
-          SizedBox(width: 10),
+          const Icon(Icons.favorite_rounded, color: ArcadeColors.softPink),
+          const SizedBox(width: 10),
           Expanded(
             child: Text(
-              'Choose what is comfortable now. The next step measures your '
-              'movement—it never asks you to stretch farther.',
+              localizations.quickPlayComfortNote,
             ),
           ),
         ],

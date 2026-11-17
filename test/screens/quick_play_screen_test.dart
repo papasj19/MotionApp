@@ -1,3 +1,4 @@
+import 'package:adaptive_motion_arcade/l10n/app_localizations.dart';
 import 'package:adaptive_motion_arcade/screens/quick_play_screen.dart';
 import 'package:adaptive_motion_arcade/theme/arcade_theme.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -7,8 +8,10 @@ void main() {
   testWidgets('shows three supported movements and a disabled leg tile', (
     tester,
   ) async {
+    final semantics = tester.ensureSemantics();
+
     await tester.pumpWidget(
-      MaterialApp(theme: buildArcadeTheme(), home: const QuickPlayScreen()),
+      _localizedTestApp(home: const QuickPlayScreen()),
     );
 
     expect(find.text('Head'), findsOneWidget);
@@ -16,18 +19,22 @@ void main() {
     expect(find.text('Finger'), findsOneWidget);
     expect(find.text('Leg'), findsOneWidget);
     expect(find.text('COMING LATER'), findsOneWidget);
+    expect(
+      tester.getSemantics(find.byKey(const Key('movement-head'))).label,
+      contains('Head. Tilt left or right.'),
+    );
 
     await tester.ensureVisible(find.byKey(const Key('movement-leg')));
     await tester.tap(find.byKey(const Key('movement-leg')));
     await tester.pumpAndSettle();
 
     expect(find.byType(QuickPlayScreen), findsOneWidget);
+    semantics.dispose();
   });
 
   testWidgets('a supported movement opens calibration', (tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        theme: buildArcadeTheme(),
+      _localizedTestApp(
         home: QuickPlayScreen(
           cameraScreenBuilder: (_) =>
               const Scaffold(body: Text('Calibration route')),
@@ -51,7 +58,7 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
 
     await tester.pumpWidget(
-      MaterialApp(theme: buildArcadeTheme(), home: const QuickPlayScreen()),
+      _localizedTestApp(home: const QuickPlayScreen()),
     );
 
     expect(tester.takeException(), isNull);
@@ -66,7 +73,7 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
 
     await tester.pumpWidget(
-      MaterialApp(theme: buildArcadeTheme(), home: const QuickPlayScreen()),
+      _localizedTestApp(home: const QuickPlayScreen()),
     );
 
     final headTop = tester.getTopLeft(find.byKey(const Key('movement-head')));
@@ -75,4 +82,13 @@ void main() {
     expect(legTop.dx, greaterThan(headTop.dx));
     expect(tester.takeException(), isNull);
   });
+}
+
+Widget _localizedTestApp({required Widget home}) {
+  return MaterialApp(
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+    theme: buildArcadeTheme(),
+    home: home,
+  );
 }
