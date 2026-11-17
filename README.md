@@ -231,6 +231,18 @@ test target.
 
 Use a connected Android or iOS device, or an installed simulator:
 
+### Launch the Pixel emulator from VS Code
+
+To restore the standalone Pixel test window, press **Command–Shift–P** in VS
+Code, select **Flutter: Launch Emulator**, and choose **Pixel XL API 32**. Wait
+for the Android home screen before pressing F5 to debug the app.
+
+If the camera shows the green Android or another artificial scene, stop the
+emulator and edit **Pixel XL API 32** in Android Studio's Device Manager. Under
+**Show Advanced Settings → Camera**, set the front camera to **Webcam0**, save,
+and cold-boot the emulator. Android Studio is only needed to configure the
+virtual device; the app should still be launched from VS Code.
+
 ```sh
 flutter pub get
 dart run mediapipe_core:bundle_models --check
