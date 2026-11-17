@@ -92,7 +92,7 @@ void main() {
     await tester.pump();
 
     expect(playRequests, 1);
-    expect(find.text('Play Sky Sprint with this control'), findsOneWidget);
+    expect(find.text('Choose a game with this control'), findsOneWidget);
   });
 
   testWidgets('shows caregiver validation diagnostics and action timing', (

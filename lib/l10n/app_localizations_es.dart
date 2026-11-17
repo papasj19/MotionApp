@@ -746,17 +746,59 @@ class AppLocalizationsEs extends AppLocalizations {
   String get signalGeometryUnavailable => 'Geometría de señal: no disponible';
 
   @override
-  String get firstGameSectionLabel => 'PRIMER JUEGO';
+  String get firstGameSectionLabel => 'JUEGOS';
 
   @override
   String get firstGameTitle => 'Carrera Celeste';
 
   @override
   String get firstGameDescription =>
-      'Ayuda a Joybit a volar con seguridad entre las puertas. Usa el botón grande o el teclado; el movimiento calibrado se conectará en la próxima fase.';
+      'Ayuda a Joybit a volar con seguridad entre las puertas.';
 
   @override
-  String get openGamePreview => 'Jugar a Carrera Celeste';
+  String get openGamePreview => 'Elegir un juego';
+
+  @override
+  String get gameSelectionTitle => 'Elegir un juego';
+
+  @override
+  String get gameSelectionHeading => 'Elige tu próximo juego';
+
+  @override
+  String get gameSelectionCardDescription =>
+      'Abre la colección de juegos. Carrera Celeste está lista y el próximo será un nuevo juego musical.';
+
+  @override
+  String get gameSelectionKeyboardDescription =>
+      'Prueba un juego con el botón grande. En un ordenador también puedes usar Espacio o Intro.';
+
+  @override
+  String get gameSelectionMotionDescription =>
+      'Tu movimiento calibrado funciona con todos los juegos disponibles.';
+
+  @override
+  String get gameSelectionMotionReadyInstruction =>
+      'Tu movimiento calibrado está listo para el juego seleccionado.';
+
+  @override
+  String get skySprintGameDescription =>
+      'Ayuda a Joybit a volar entre las puertas en este primer reto arcade.';
+
+  @override
+  String get playSelectedGame => 'JUGAR';
+
+  @override
+  String get musicGameTitle => 'Creador musical';
+
+  @override
+  String get musicGameDescription =>
+      'Usa un movimiento cómodo para tocar un instrumento. Elegiremos y construiremos el instrumento en la próxima fase.';
+
+  @override
+  String get comingNext => 'PRÓXIMO JUEGO';
+
+  @override
+  String get donePlaying => 'Terminar de jugar';
 
   @override
   String get gameTitle => 'Carrera Celeste';
@@ -830,7 +872,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'Vuelve a colocar la zona del cuerpo seguida. El juego esperará de forma segura.';
 
   @override
-  String get playGameWithControl => 'Jugar a Carrera Celeste con este control';
+  String get chooseGamesWithControl => 'Elegir un juego con este control';
 
   @override
   String get gamePauseTooltip => 'Pausar el juego';
@@ -842,7 +884,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get gameRestartTooltip => 'Reiniciar el juego';
 
   @override
-  String get gameExitTooltip => 'Volver a Juego rápido';
+  String get gameExitTooltip => 'Volver a elegir juego';
 
   @override
   String get joybitDescription =>

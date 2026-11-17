@@ -5,7 +5,7 @@ import '../movement/movement_measurement.dart';
 import '../theme/arcade_theme.dart';
 import '../widgets/joybit_companion.dart';
 import 'camera_screen.dart';
-import 'flap_to_fly_screen.dart';
+import 'game_selection_screen.dart';
 
 class QuickPlayScreen extends StatelessWidget {
   const QuickPlayScreen({
@@ -84,7 +84,7 @@ class QuickPlayScreen extends StatelessWidget {
       MaterialPageRoute<void>(
         builder: (routeContext) =>
             gamePreviewScreenBuilder?.call(routeContext) ??
-            const FlapToFlyScreen(),
+            const GameSelectionScreen(),
       ),
     );
   }
@@ -373,13 +373,13 @@ class _GamePreviewCard extends StatelessWidget {
         ),
         const SizedBox(height: 5),
         Text(
-          localizations.firstGameTitle,
+          localizations.gameSelectionTitle,
           style: Theme.of(
             context,
           ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900),
         ),
         const SizedBox(height: 6),
-        Text(localizations.firstGameDescription),
+        Text(localizations.gameSelectionCardDescription),
       ],
     );
     final button = FilledButton.icon(
@@ -393,8 +393,8 @@ class _GamePreviewCard extends StatelessWidget {
       key: const Key('first-game-preview-card'),
       container: true,
       label: localizations.optionSemantics(
-        localizations.firstGameTitle,
-        localizations.firstGameDescription,
+        localizations.gameSelectionTitle,
+        localizations.gameSelectionCardDescription,
       ),
       child: Card(
         margin: EdgeInsets.zero,

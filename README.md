@@ -188,6 +188,13 @@ Tracking loss suspends play, and recovery requires a comfortable return to rest
 before the game resumes. Game score remains separate from physical movement
 data and is not presented as motor improvement. Sessions are not persisted yet.
 
+After Control Test, the calibrated input now opens a responsive game-selection
+screen based on the cartridge-style wireframe. Sky Sprint is playable and
+returns to that screen when closed. A disabled Music Maker cartridge reserves
+the second slot without pretending that its instrument interaction has already
+been designed or implemented. The same selection screen is available from
+Quick Play for camera-free button and keyboard testing.
+
 Game difficulty and physical control sensitivity must remain independent.
 `FlapToFlyConfig` already isolates game-only values such as gravity, obstacle
 speed, spacing and gap size. Sky Sprint's current values remain unchanged for

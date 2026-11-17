@@ -260,7 +260,7 @@ class _MotionControlTestPanelState extends State<MotionControlTestPanel> {
                   key: const Key('play-game-with-motion-control'),
                   onPressed: widget.onPlayGameRequested,
                   icon: const Icon(Icons.rocket_launch_rounded),
-                  label: Text(localizations.playGameWithControl),
+                  label: Text(localizations.chooseGamesWithControl),
                   style: FilledButton.styleFrom(
                     minimumSize: const Size.fromHeight(64),
                     textStyle: const TextStyle(

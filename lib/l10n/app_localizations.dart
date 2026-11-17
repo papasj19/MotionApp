@@ -1158,7 +1158,7 @@ abstract class AppLocalizations {
   /// No description provided for @firstGameSectionLabel.
   ///
   /// In en, this message translates to:
-  /// **'FIRST GAME'**
+  /// **'GAMES'**
   String get firstGameSectionLabel;
 
   /// No description provided for @firstGameTitle.
@@ -1170,14 +1170,86 @@ abstract class AppLocalizations {
   /// No description provided for @firstGameDescription.
   ///
   /// In en, this message translates to:
-  /// **'Help Joybit fly safely through the gates. Use the large button or keyboard; calibrated movement connects in the next checkpoint.'**
+  /// **'Help Joybit fly safely through the gates.'**
   String get firstGameDescription;
 
   /// No description provided for @openGamePreview.
   ///
   /// In en, this message translates to:
-  /// **'Play Sky Sprint'**
+  /// **'Choose a game'**
   String get openGamePreview;
+
+  /// No description provided for @gameSelectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a game'**
+  String get gameSelectionTitle;
+
+  /// No description provided for @gameSelectionHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick your next game'**
+  String get gameSelectionHeading;
+
+  /// No description provided for @gameSelectionCardDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the game cabinet. Sky Sprint is ready, and a new music game is coming next.'**
+  String get gameSelectionCardDescription;
+
+  /// No description provided for @gameSelectionKeyboardDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Try a game with the large button. On a computer, Space or Enter also works.'**
+  String get gameSelectionKeyboardDescription;
+
+  /// No description provided for @gameSelectionMotionDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Your calibrated movement works with every available game.'**
+  String get gameSelectionMotionDescription;
+
+  /// No description provided for @gameSelectionMotionReadyInstruction.
+  ///
+  /// In en, this message translates to:
+  /// **'Your calibrated movement is ready for the selected game.'**
+  String get gameSelectionMotionReadyInstruction;
+
+  /// No description provided for @skySprintGameDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Help Joybit fly through the gates in this first arcade challenge.'**
+  String get skySprintGameDescription;
+
+  /// No description provided for @playSelectedGame.
+  ///
+  /// In en, this message translates to:
+  /// **'PLAY'**
+  String get playSelectedGame;
+
+  /// No description provided for @musicGameTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Music Maker'**
+  String get musicGameTitle;
+
+  /// No description provided for @musicGameDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Use one comfortable movement to play an instrument. We will choose and build the instrument in the next stage.'**
+  String get musicGameDescription;
+
+  /// No description provided for @comingNext.
+  ///
+  /// In en, this message translates to:
+  /// **'COMING NEXT'**
+  String get comingNext;
+
+  /// No description provided for @donePlaying.
+  ///
+  /// In en, this message translates to:
+  /// **'Done playing'**
+  String get donePlaying;
 
   /// No description provided for @gameTitle.
   ///
@@ -1299,11 +1371,11 @@ abstract class AppLocalizations {
   /// **'Reposition the tracked body area. The game will wait safely.'**
   String get gameMotionTrackingPausedInstruction;
 
-  /// No description provided for @playGameWithControl.
+  /// No description provided for @chooseGamesWithControl.
   ///
   /// In en, this message translates to:
-  /// **'Play Sky Sprint with this control'**
-  String get playGameWithControl;
+  /// **'Choose a game with this control'**
+  String get chooseGamesWithControl;
 
   /// No description provided for @gamePauseTooltip.
   ///
@@ -1326,7 +1398,7 @@ abstract class AppLocalizations {
   /// No description provided for @gameExitTooltip.
   ///
   /// In en, this message translates to:
-  /// **'Return to Quick Play'**
+  /// **'Return to game selection'**
   String get gameExitTooltip;
 
   /// No description provided for @joybitDescription.

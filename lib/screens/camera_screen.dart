@@ -18,7 +18,7 @@ import '../theme/arcade_theme.dart';
 import '../widgets/calibration_panel.dart';
 import '../widgets/hand_skeleton_overlay.dart';
 import '../widgets/motion_control_test_panel.dart';
-import 'flap_to_fly_screen.dart';
+import 'game_selection_screen.dart';
 
 enum _CameraViewState {
   initializing,
@@ -381,7 +381,7 @@ class _CameraScreenState extends State<CameraScreen>
                         processingLatency: trackingUpdate?.processingLatency,
                         droppedFrames: trackingUpdate?.droppedFrames ?? 0,
                         onPlayGameRequested: () =>
-                            _startMotionGame(controlTestProfile),
+                            _openGameSelection(controlTestProfile),
                       )
                     else if (movementReading != null)
                       CalibrationPanel(
@@ -499,7 +499,7 @@ class _CameraScreenState extends State<CameraScreen>
     setState(() => _controlTestProfile = null);
   }
 
-  Future<void> _startMotionGame(CalibrationProfile profile) async {
+  Future<void> _openGameSelection(CalibrationProfile profile) async {
     if (_activeGameInputSession != null) {
       return;
     }
@@ -513,7 +513,7 @@ class _CameraScreenState extends State<CameraScreen>
     try {
       await Navigator.of(context).push<void>(
         MaterialPageRoute<void>(
-          builder: (_) => FlapToFlyScreen(
+          builder: (_) => GameSelectionScreen(
             inputController: session.arcadeInput,
             motionInputStatus: session.motionStatus,
           ),
@@ -533,8 +533,10 @@ class _CameraScreenState extends State<CameraScreen>
       return;
     }
     session.markTrackingUnavailable();
-    if (mounted && ModalRoute.of(context)?.isCurrent == false) {
-      await Navigator.of(context).maybePop();
+    final cameraRoute = mounted ? ModalRoute.of(context) : null;
+    if (cameraRoute != null && !cameraRoute.isCurrent) {
+      Navigator.of(context).popUntil((route) => identical(route, cameraRoute));
+      await Future<void>.delayed(Duration.zero);
     }
   }
 }

@@ -732,17 +732,59 @@ class AppLocalizationsEn extends AppLocalizations {
   String get signalGeometryUnavailable => 'Signal geometry: unavailable';
 
   @override
-  String get firstGameSectionLabel => 'FIRST GAME';
+  String get firstGameSectionLabel => 'GAMES';
 
   @override
   String get firstGameTitle => 'Sky Sprint';
 
   @override
   String get firstGameDescription =>
-      'Help Joybit fly safely through the gates. Use the large button or keyboard; calibrated movement connects in the next checkpoint.';
+      'Help Joybit fly safely through the gates.';
 
   @override
-  String get openGamePreview => 'Play Sky Sprint';
+  String get openGamePreview => 'Choose a game';
+
+  @override
+  String get gameSelectionTitle => 'Choose a game';
+
+  @override
+  String get gameSelectionHeading => 'Pick your next game';
+
+  @override
+  String get gameSelectionCardDescription =>
+      'Open the game cabinet. Sky Sprint is ready, and a new music game is coming next.';
+
+  @override
+  String get gameSelectionKeyboardDescription =>
+      'Try a game with the large button. On a computer, Space or Enter also works.';
+
+  @override
+  String get gameSelectionMotionDescription =>
+      'Your calibrated movement works with every available game.';
+
+  @override
+  String get gameSelectionMotionReadyInstruction =>
+      'Your calibrated movement is ready for the selected game.';
+
+  @override
+  String get skySprintGameDescription =>
+      'Help Joybit fly through the gates in this first arcade challenge.';
+
+  @override
+  String get playSelectedGame => 'PLAY';
+
+  @override
+  String get musicGameTitle => 'Music Maker';
+
+  @override
+  String get musicGameDescription =>
+      'Use one comfortable movement to play an instrument. We will choose and build the instrument in the next stage.';
+
+  @override
+  String get comingNext => 'COMING NEXT';
+
+  @override
+  String get donePlaying => 'Done playing';
 
   @override
   String get gameTitle => 'Sky Sprint';
@@ -816,7 +858,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Reposition the tracked body area. The game will wait safely.';
 
   @override
-  String get playGameWithControl => 'Play Sky Sprint with this control';
+  String get chooseGamesWithControl => 'Choose a game with this control';
 
   @override
   String get gamePauseTooltip => 'Pause game';
@@ -828,7 +870,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gameRestartTooltip => 'Restart game';
 
   @override
-  String get gameExitTooltip => 'Return to Quick Play';
+  String get gameExitTooltip => 'Return to game selection';
 
   @override
   String get joybitDescription =>

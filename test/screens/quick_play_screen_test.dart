@@ -68,6 +68,22 @@ void main() {
     expect(find.text('Injected game preview'), findsOneWidget);
   });
 
+  testWidgets('default games button opens the game selection screen', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      localizedTestApp(home: const QuickPlayScreen()),
+    );
+
+    await tester.ensureVisible(find.byKey(const Key('open-game-preview')));
+    await tester.tap(find.byKey(const Key('open-game-preview')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Pick your next game'), findsOneWidget);
+    expect(find.text('Sky Sprint'), findsOneWidget);
+    expect(find.text('Music Maker'), findsOneWidget);
+  });
+
   testWidgets('movement tiles reflow on a narrow portrait phone', (
     tester,
   ) async {
