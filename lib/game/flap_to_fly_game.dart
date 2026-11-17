@@ -7,20 +7,39 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart' show KeyEventResult;
 
+import 'flap_to_fly_mechanics.dart';
 import 'input/arcade_input.dart';
 
 class FlapToFlyGameState extends ChangeNotifier {
   int _actionCount = 0;
+  int _score = 0;
   bool _paused = false;
+  FlapToFlyRunStatus _runStatus = FlapToFlyRunStatus.ready;
   ArcadeInputSource? _lastInputSource;
 
   int get actionCount => _actionCount;
+  int get score => _score;
   bool get paused => _paused;
+  FlapToFlyRunStatus get runStatus => _runStatus;
   ArcadeInputSource? get lastInputSource => _lastInputSource;
 
-  void recordAction(ArcadeInputSource source) {
+  void recordAction(
+    ArcadeInputSource source,
+    FlapToFlyMechanics mechanics,
+  ) {
     _actionCount += 1;
     _lastInputSource = source;
+    _score = mechanics.score;
+    _runStatus = mechanics.status;
+    notifyListeners();
+  }
+
+  void syncFrom(FlapToFlyMechanics mechanics) {
+    if (_score == mechanics.score && _runStatus == mechanics.status) {
+      return;
+    }
+    _score = mechanics.score;
+    _runStatus = mechanics.status;
     notifyListeners();
   }
 
@@ -32,23 +51,26 @@ class FlapToFlyGameState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void reset() {
+  void resetFrom(FlapToFlyMechanics mechanics) {
     _actionCount = 0;
     _lastInputSource = null;
+    _score = mechanics.score;
+    _runStatus = mechanics.status;
     notifyListeners();
   }
 }
 
-/// Stage 9A Flame shell for the first one-action arcade game.
+/// Camera-free Flame presentation for Sky Sprint.
 ///
-/// This class deliberately knows nothing about cameras, landmarks, movement
-/// measurements, or calibration. Stage 9B will add deterministic flight and
-/// obstacle mechanics behind the same [ArcadeInputController] boundary.
+/// Deterministic movement, collisions, scoring, and restart state live in
+/// [FlapToFlyMechanics]. This class owns only the game loop, drawing, and the
+/// shared [ArcadeInputController] boundary that Stage 9C can connect to motion.
 class FlapToFlyGame extends FlameGame with KeyboardEvents {
   FlapToFlyGame({
     required this.input,
     required this.gameState,
-  });
+    FlapToFlyMechanics? mechanics,
+  }) : mechanics = mechanics ?? FlapToFlyMechanics();
 
   static const _background = Color(0xFF17102F);
   static const _deepViolet = Color(0xFF24134F);
@@ -58,10 +80,11 @@ class FlapToFlyGame extends FlameGame with KeyboardEvents {
   static const _electricCyan = Color(0xFF43DCEB);
   static const _warmCream = Color(0xFFFFE8CB);
   static const _arcadeYellow = Color(0xFFFFD15A);
-  static const _pulseDuration = 0.24;
+  static const _pulseDuration = 0.18;
 
   final ArcadeInputController input;
   final FlapToFlyGameState gameState;
+  final FlapToFlyMechanics mechanics;
 
   double _pulseRemaining = 0;
 
@@ -72,12 +95,15 @@ class FlapToFlyGame extends FlameGame with KeyboardEvents {
   Future<void> onLoad() async {
     await super.onLoad();
     input.addListener(_handleInput);
+    gameState.syncFrom(mechanics);
   }
 
   @override
   void update(double dt) {
     super.update(dt);
     _pulseRemaining = math.max(0, _pulseRemaining - dt);
+    mechanics.update(dt);
+    gameState.syncFrom(mechanics);
   }
 
   @override
@@ -89,14 +115,27 @@ class FlapToFlyGame extends FlameGame with KeyboardEvents {
       return;
     }
 
-    _drawArcadeGrid(canvas, width, height);
-    _drawStars(canvas, width, height);
-    _drawFlightPath(canvas, width, height);
-    _drawJoybitFlyer(canvas, width, height);
+    final config = mechanics.config;
+    final worldScale = math.min(
+      width / config.worldWidth,
+      height / config.worldHeight,
+    );
+    final horizontalInset = (width - config.worldWidth * worldScale) / 2;
+    final verticalInset = (height - config.worldHeight * worldScale) / 2;
+
+    canvas.save();
+    canvas.translate(horizontalInset, verticalInset);
+    canvas.scale(worldScale, worldScale);
+    _drawArcadeGrid(canvas, config.worldWidth, config.worldHeight);
+    _drawStars(canvas, config.worldWidth, config.worldHeight);
+    _drawObstacles(canvas);
+    _drawJoybitFlyer(canvas);
+    canvas.restore();
   }
 
   void pauseGame() {
-    if (gameState.paused) {
+    if (gameState.paused ||
+        gameState.runStatus == FlapToFlyRunStatus.gameOver) {
       return;
     }
     gameState.setPaused(true);
@@ -112,11 +151,12 @@ class FlapToFlyGame extends FlameGame with KeyboardEvents {
   }
 
   void restartGame() {
-    _pulseRemaining = 0;
-    gameState.reset();
     if (gameState.paused) {
       resumeGame();
     }
+    _pulseRemaining = 0;
+    mechanics.restart();
+    gameState.resetFrom(mechanics);
   }
 
   @override
@@ -144,18 +184,21 @@ class FlapToFlyGame extends FlameGame with KeyboardEvents {
   }
 
   void _handleInput(ArcadeInputEvent event) {
-    if (gameState.paused || event.action != ArcadeInputAction.primaryAction) {
+    if (gameState.paused ||
+        mechanics.status == FlapToFlyRunStatus.gameOver ||
+        event.action != ArcadeInputAction.primaryAction) {
       return;
     }
     _pulseRemaining = _pulseDuration;
-    gameState.recordAction(event.source);
+    mechanics.flap();
+    gameState.recordAction(event.source, mechanics);
   }
 
   void _drawArcadeGrid(Canvas canvas, double width, double height) {
     final gridPaint = Paint()
-      ..color = _royalPurple.withValues(alpha: 0.22)
-      ..strokeWidth = 1;
-    const spacing = 24.0;
+      ..color = _royalPurple.withValues(alpha: 0.20)
+      ..strokeWidth = 2;
+    const spacing = 48.0;
     for (var x = 0.0; x <= width; x += spacing) {
       canvas.drawLine(Offset(x, 0), Offset(x, height), gridPaint);
     }
@@ -171,35 +214,77 @@ class FlapToFlyGame extends FlameGame with KeyboardEvents {
       Offset(width * 0.34, height * 0.10),
       Offset(width * 0.70, height * 0.20),
       Offset(width * 0.88, height * 0.12),
+      Offset(width * 0.55, height * 0.82),
     ];
     for (final star in stars) {
       canvas.drawRect(
-        Rect.fromCenter(center: star, width: 5, height: 5),
+        Rect.fromCenter(center: star, width: 8, height: 8),
         starPaint,
       );
     }
   }
 
-  void _drawFlightPath(Canvas canvas, double width, double height) {
-    final pathPaint = Paint()
-      ..color = _electricCyan.withValues(alpha: 0.75)
-      ..strokeWidth = 3
+  void _drawObstacles(Canvas canvas) {
+    final config = mechanics.config;
+    final fillPaint = Paint()..color = _royalPurple;
+    final capPaint = Paint()..color = _softPink;
+    final outlinePaint = Paint()
+      ..color = _electricCyan
+      ..strokeWidth = 6
       ..style = PaintingStyle.stroke;
-    final y = height * 0.58;
-    canvas.drawLine(
-      Offset(width * 0.10, y),
-      Offset(width * 0.90, y),
-      pathPaint,
-    );
+
+    for (final obstacle in mechanics.obstacles) {
+      final gapTop = obstacle.gapCenterY - config.obstacleGapHeight / 2;
+      final gapBottom = obstacle.gapCenterY + config.obstacleGapHeight / 2;
+      final top = Rect.fromLTWH(
+        obstacle.x,
+        0,
+        config.obstacleWidth,
+        gapTop,
+      );
+      final bottom = Rect.fromLTWH(
+        obstacle.x,
+        gapBottom,
+        config.obstacleWidth,
+        config.worldHeight - gapBottom,
+      );
+      canvas.drawRect(top, fillPaint);
+      canvas.drawRect(bottom, fillPaint);
+      canvas.drawRect(top, outlinePaint);
+      canvas.drawRect(bottom, outlinePaint);
+
+      const capHeight = 24.0;
+      final capInset = config.obstacleWidth * 0.12;
+      canvas.drawRect(
+        Rect.fromLTWH(
+          obstacle.x - capInset,
+          math.max(0, gapTop - capHeight),
+          config.obstacleWidth + capInset * 2,
+          capHeight,
+        ),
+        capPaint,
+      );
+      canvas.drawRect(
+        Rect.fromLTWH(
+          obstacle.x - capInset,
+          gapBottom,
+          config.obstacleWidth + capInset * 2,
+          capHeight,
+        ),
+        capPaint,
+      );
+    }
   }
 
-  void _drawJoybitFlyer(Canvas canvas, double width, double height) {
+  void _drawJoybitFlyer(Canvas canvas) {
+    final config = mechanics.config;
     final pulseProgress = _pulseRemaining / _pulseDuration;
-    final lift = math.sin(pulseProgress * math.pi) * 28;
-    final scale = math.max(0.72, math.min(width / 520, height / 320));
+    final wingLift = math.sin(pulseProgress * math.pi) * 8;
+    final width = config.flyerWidth;
+    final height = config.flyerHeight;
+
     canvas.save();
-    canvas.translate(width * 0.5, height * 0.58 - lift);
-    canvas.scale(scale, scale);
+    canvas.translate(config.flyerX, mechanics.flyerY);
 
     final outlinePaint = Paint()..color = _deepViolet;
     final bodyPaint = Paint()..color = _lavender;
@@ -207,18 +292,42 @@ class FlapToFlyGame extends FlameGame with KeyboardEvents {
     final wingPaint = Paint()..color = _softPink;
     final headsetPaint = Paint()..color = _electricCyan;
 
-    canvas.drawRect(const Rect.fromLTWH(-58, -36, 116, 72), outlinePaint);
-    canvas.drawRect(const Rect.fromLTWH(-50, -30, 100, 60), bodyPaint);
-    canvas.drawRect(const Rect.fromLTWH(4, -22, 38, 44), facePaint);
-    canvas.drawRect(const Rect.fromLTWH(-74, -15, 24, 30), wingPaint);
-    canvas.drawRect(const Rect.fromLTWH(50, -15, 24, 30), wingPaint);
-    canvas.drawRect(const Rect.fromLTWH(-36, -43, 72, 9), headsetPaint);
-    canvas.drawRect(const Rect.fromLTWH(-47, -34, 10, 28), headsetPaint);
-    canvas.drawRect(const Rect.fromLTWH(37, -34, 10, 28), headsetPaint);
-    canvas.drawRect(const Rect.fromLTWH(15, -10, 7, 7), outlinePaint);
-    canvas.drawRect(const Rect.fromLTWH(32, -10, 7, 7), outlinePaint);
-    canvas.drawRect(const Rect.fromLTWH(42, 4, 8, 8), outlinePaint);
-
+    canvas.drawRect(
+      Rect.fromCenter(center: Offset.zero, width: width, height: height),
+      outlinePaint,
+    );
+    canvas.drawRect(
+      Rect.fromCenter(
+        center: Offset.zero,
+        width: width - 10,
+        height: height - 10,
+      ),
+      bodyPaint,
+    );
+    canvas.drawRect(
+      Rect.fromLTWH(0, -height * 0.32, width * 0.34, height * 0.64),
+      facePaint,
+    );
+    canvas.drawRect(
+      Rect.fromLTWH(-width * 0.62, -10 - wingLift, width * 0.16, 22),
+      wingPaint,
+    );
+    canvas.drawRect(
+      Rect.fromLTWH(width * 0.46, -10 - wingLift, width * 0.16, 22),
+      wingPaint,
+    );
+    canvas.drawRect(
+      Rect.fromLTWH(-width * 0.28, -height * 0.65, width * 0.56, 8),
+      headsetPaint,
+    );
+    canvas.drawRect(
+      Rect.fromLTWH(width * 0.10, -7, 6, 6),
+      outlinePaint,
+    );
+    canvas.drawRect(
+      Rect.fromLTWH(width * 0.27, -7, 6, 6),
+      outlinePaint,
+    );
     canvas.restore();
   }
 }

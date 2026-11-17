@@ -732,27 +732,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get signalGeometryUnavailable => 'Signal geometry: unavailable';
 
   @override
-  String get firstGameSectionLabel => 'FIRST GAME PREVIEW';
+  String get firstGameSectionLabel => 'FIRST GAME';
 
   @override
   String get firstGameTitle => 'Sky Sprint';
 
   @override
   String get firstGameDescription =>
-      'Use one action to help Joybit fly. This preview uses the large button or keyboard; calibrated movement connects in a later checkpoint.';
+      'Help Joybit fly safely through the gates. Use the large button or keyboard; calibrated movement connects in the next checkpoint.';
 
   @override
-  String get openGamePreview => 'Open game preview';
+  String get openGamePreview => 'Play Sky Sprint';
 
   @override
   String get gameTitle => 'Sky Sprint';
-
-  @override
-  String get gamePreviewLabel => 'INPUT PREVIEW';
-
-  @override
-  String get gameInputInstructions =>
-      'Use the large button. On a computer, Space or Enter also works.';
 
   @override
   String get gamePrimaryAction => 'FLY';
@@ -761,31 +754,42 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gamePrimaryActionSemantics => 'Make Joybit fly';
 
   @override
-  String gameActionCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'Actions: $count',
-      one: 'Action: 1',
-      zero: 'Actions: 0',
-    );
-    return '$_temp0';
+  String gameScore(int score) {
+    return 'Score: $score';
   }
 
   @override
-  String gameStatusSemantics(String status, int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count actions received',
-      one: 'One action received',
-      zero: 'No actions received',
-    );
-    return 'Sky Sprint input preview. $status. $_temp0.';
+  String gameStatusSemantics(String status, int score, String instruction) {
+    return 'Sky Sprint. $status. Score: $score. $instruction';
   }
 
   @override
   String get gameReady => 'Ready';
+
+  @override
+  String get gameFlying => 'Flying';
+
+  @override
+  String get gameOver => 'Game over';
+
+  @override
+  String get gameReadyInstruction =>
+      'Press FLY to start. On a computer, Space or Enter also works.';
+
+  @override
+  String get gameFlyingInstruction => 'Keep Joybit between the gates.';
+
+  @override
+  String get gameOverInstruction =>
+      'Restart to try the same obstacle course again.';
+
+  @override
+  String get gameRestartAction => 'PLAY AGAIN';
+
+  @override
+  String gameOverSemantics(int score) {
+    return 'Game over. Score: $score. Play again to restart the same obstacle course.';
+  }
 
   @override
   String get gamePaused => 'Paused';
@@ -797,7 +801,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gameResumeTooltip => 'Resume game';
 
   @override
-  String get gameRestartTooltip => 'Restart game preview';
+  String get gameRestartTooltip => 'Restart game';
 
   @override
   String get gameExitTooltip => 'Return to Quick Play';

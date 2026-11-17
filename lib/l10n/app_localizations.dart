@@ -1158,7 +1158,7 @@ abstract class AppLocalizations {
   /// No description provided for @firstGameSectionLabel.
   ///
   /// In en, this message translates to:
-  /// **'FIRST GAME PREVIEW'**
+  /// **'FIRST GAME'**
   String get firstGameSectionLabel;
 
   /// No description provided for @firstGameTitle.
@@ -1170,13 +1170,13 @@ abstract class AppLocalizations {
   /// No description provided for @firstGameDescription.
   ///
   /// In en, this message translates to:
-  /// **'Use one action to help Joybit fly. This preview uses the large button or keyboard; calibrated movement connects in a later checkpoint.'**
+  /// **'Help Joybit fly safely through the gates. Use the large button or keyboard; calibrated movement connects in the next checkpoint.'**
   String get firstGameDescription;
 
   /// No description provided for @openGamePreview.
   ///
   /// In en, this message translates to:
-  /// **'Open game preview'**
+  /// **'Play Sky Sprint'**
   String get openGamePreview;
 
   /// No description provided for @gameTitle.
@@ -1184,18 +1184,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sky Sprint'**
   String get gameTitle;
-
-  /// No description provided for @gamePreviewLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'INPUT PREVIEW'**
-  String get gamePreviewLabel;
-
-  /// No description provided for @gameInputInstructions.
-  ///
-  /// In en, this message translates to:
-  /// **'Use the large button. On a computer, Space or Enter also works.'**
-  String get gameInputInstructions;
 
   /// No description provided for @gamePrimaryAction.
   ///
@@ -1209,23 +1197,65 @@ abstract class AppLocalizations {
   /// **'Make Joybit fly'**
   String get gamePrimaryActionSemantics;
 
-  /// No description provided for @gameActionCount.
+  /// No description provided for @gameScore.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =0{Actions: 0} =1{Action: 1} other{Actions: {count}}}'**
-  String gameActionCount(int count);
+  /// **'Score: {score}'**
+  String gameScore(int score);
 
   /// No description provided for @gameStatusSemantics.
   ///
   /// In en, this message translates to:
-  /// **'Sky Sprint input preview. {status}. {count, plural, =0{No actions received} =1{One action received} other{{count} actions received}}.'**
-  String gameStatusSemantics(String status, int count);
+  /// **'Sky Sprint. {status}. Score: {score}. {instruction}'**
+  String gameStatusSemantics(String status, int score, String instruction);
 
   /// No description provided for @gameReady.
   ///
   /// In en, this message translates to:
   /// **'Ready'**
   String get gameReady;
+
+  /// No description provided for @gameFlying.
+  ///
+  /// In en, this message translates to:
+  /// **'Flying'**
+  String get gameFlying;
+
+  /// No description provided for @gameOver.
+  ///
+  /// In en, this message translates to:
+  /// **'Game over'**
+  String get gameOver;
+
+  /// No description provided for @gameReadyInstruction.
+  ///
+  /// In en, this message translates to:
+  /// **'Press FLY to start. On a computer, Space or Enter also works.'**
+  String get gameReadyInstruction;
+
+  /// No description provided for @gameFlyingInstruction.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep Joybit between the gates.'**
+  String get gameFlyingInstruction;
+
+  /// No description provided for @gameOverInstruction.
+  ///
+  /// In en, this message translates to:
+  /// **'Restart to try the same obstacle course again.'**
+  String get gameOverInstruction;
+
+  /// No description provided for @gameRestartAction.
+  ///
+  /// In en, this message translates to:
+  /// **'PLAY AGAIN'**
+  String get gameRestartAction;
+
+  /// No description provided for @gameOverSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Game over. Score: {score}. Play again to restart the same obstacle course.'**
+  String gameOverSemantics(int score);
 
   /// No description provided for @gamePaused.
   ///
@@ -1248,7 +1278,7 @@ abstract class AppLocalizations {
   /// No description provided for @gameRestartTooltip.
   ///
   /// In en, this message translates to:
-  /// **'Restart game preview'**
+  /// **'Restart game'**
   String get gameRestartTooltip;
 
   /// No description provided for @gameExitTooltip.

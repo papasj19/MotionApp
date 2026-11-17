@@ -746,27 +746,20 @@ class AppLocalizationsEs extends AppLocalizations {
   String get signalGeometryUnavailable => 'Geometría de señal: no disponible';
 
   @override
-  String get firstGameSectionLabel => 'VISTA PREVIA DEL PRIMER JUEGO';
+  String get firstGameSectionLabel => 'PRIMER JUEGO';
 
   @override
   String get firstGameTitle => 'Carrera Celeste';
 
   @override
   String get firstGameDescription =>
-      'Usa una acción para ayudar a Joybit a volar. Esta vista previa utiliza el botón grande o el teclado; el movimiento calibrado se conectará en una fase posterior.';
+      'Ayuda a Joybit a volar con seguridad entre las puertas. Usa el botón grande o el teclado; el movimiento calibrado se conectará en la próxima fase.';
 
   @override
-  String get openGamePreview => 'Abrir la vista previa';
+  String get openGamePreview => 'Jugar a Carrera Celeste';
 
   @override
   String get gameTitle => 'Carrera Celeste';
-
-  @override
-  String get gamePreviewLabel => 'PRUEBA DE ENTRADA';
-
-  @override
-  String get gameInputInstructions =>
-      'Usa el botón grande. En un ordenador también puedes usar Espacio o Intro.';
 
   @override
   String get gamePrimaryAction => 'VOLAR';
@@ -775,31 +768,42 @@ class AppLocalizationsEs extends AppLocalizations {
   String get gamePrimaryActionSemantics => 'Hacer que Joybit vuele';
 
   @override
-  String gameActionCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'Acciones: $count',
-      one: 'Acción: 1',
-      zero: 'Acciones: 0',
-    );
-    return '$_temp0';
+  String gameScore(int score) {
+    return 'Puntos: $score';
   }
 
   @override
-  String gameStatusSemantics(String status, int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'Se han recibido $count acciones',
-      one: 'Se ha recibido una acción',
-      zero: 'No se ha recibido ninguna acción',
-    );
-    return 'Vista previa de Carrera Celeste. $status. $_temp0.';
+  String gameStatusSemantics(String status, int score, String instruction) {
+    return 'Carrera Celeste. $status. Puntos: $score. $instruction';
   }
 
   @override
   String get gameReady => 'Listo';
+
+  @override
+  String get gameFlying => 'Volando';
+
+  @override
+  String get gameOver => 'Fin del juego';
+
+  @override
+  String get gameReadyInstruction =>
+      'Pulsa VOLAR para comenzar. En un ordenador también puedes usar Espacio o Intro.';
+
+  @override
+  String get gameFlyingInstruction => 'Mantén a Joybit entre las puertas.';
+
+  @override
+  String get gameOverInstruction =>
+      'Reinicia para volver a intentar el mismo recorrido.';
+
+  @override
+  String get gameRestartAction => 'JUGAR DE NUEVO';
+
+  @override
+  String gameOverSemantics(int score) {
+    return 'Fin del juego. Puntos: $score. Juega de nuevo para reiniciar el mismo recorrido.';
+  }
 
   @override
   String get gamePaused => 'En pausa';
@@ -811,7 +815,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get gameResumeTooltip => 'Reanudar el juego';
 
   @override
-  String get gameRestartTooltip => 'Reiniciar la vista previa';
+  String get gameRestartTooltip => 'Reiniciar el juego';
 
   @override
   String get gameExitTooltip => 'Volver a Juego rápido';

@@ -330,31 +330,40 @@
   "signalGeometryUsable": "Signal geometry: usable",
   "signalGeometrySettling": "Signal geometry: settling",
   "signalGeometryUnavailable": "Signal geometry: unavailable",
-  "firstGameSectionLabel": "FIRST GAME PREVIEW",
+  "firstGameSectionLabel": "FIRST GAME",
   "firstGameTitle": "Sky Sprint",
-  "firstGameDescription": "Use one action to help Joybit fly. This preview uses the large button or keyboard; calibrated movement connects in a later checkpoint.",
-  "openGamePreview": "Open game preview",
+  "firstGameDescription": "Help Joybit fly safely through the gates. Use the large button or keyboard; calibrated movement connects in the next checkpoint.",
+  "openGamePreview": "Play Sky Sprint",
   "gameTitle": "Sky Sprint",
-  "gamePreviewLabel": "INPUT PREVIEW",
-  "gameInputInstructions": "Use the large button. On a computer, Space or Enter also works.",
   "gamePrimaryAction": "FLY",
   "gamePrimaryActionSemantics": "Make Joybit fly",
-  "gameActionCount": "{count, plural, =0{Actions: 0} =1{Action: 1} other{Actions: {count}}}",
-  "@gameActionCount": {
-    "placeholders": {"count": {"type": "int"}}
+  "gameScore": "Score: {score}",
+  "@gameScore": {
+    "placeholders": {"score": {"type": "int"}}
   },
-  "gameStatusSemantics": "Sky Sprint input preview. {status}. {count, plural, =0{No actions received} =1{One action received} other{{count} actions received}}.",
+  "gameStatusSemantics": "Sky Sprint. {status}. Score: {score}. {instruction}",
   "@gameStatusSemantics": {
     "placeholders": {
       "status": {"type": "String"},
-      "count": {"type": "int"}
+      "score": {"type": "int"},
+      "instruction": {"type": "String"}
     }
   },
   "gameReady": "Ready",
+  "gameFlying": "Flying",
+  "gameOver": "Game over",
+  "gameReadyInstruction": "Press FLY to start. On a computer, Space or Enter also works.",
+  "gameFlyingInstruction": "Keep Joybit between the gates.",
+  "gameOverInstruction": "Restart to try the same obstacle course again.",
+  "gameRestartAction": "PLAY AGAIN",
+  "gameOverSemantics": "Game over. Score: {score}. Play again to restart the same obstacle course.",
+  "@gameOverSemantics": {
+    "placeholders": {"score": {"type": "int"}}
+  },
   "gamePaused": "Paused",
   "gamePauseTooltip": "Pause game",
   "gameResumeTooltip": "Resume game",
-  "gameRestartTooltip": "Restart game preview",
+  "gameRestartTooltip": "Restart game",
   "gameExitTooltip": "Return to Quick Play",
   "joybitDescription": "Joybit, a friendly lavender hedgehog wearing arcade headphones."
 }

@@ -2,6 +2,7 @@ import 'package:flame/game.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../game/flap_to_fly_game.dart';
+import '../game/flap_to_fly_mechanics.dart';
 import '../game/input/arcade_input.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/arcade_theme.dart';
@@ -56,7 +57,9 @@ class _FlapToFlyScreenState extends State<FlapToFlyScreen> {
               tooltip: _gameState.paused
                   ? localizations.gameResumeTooltip
                   : localizations.gamePauseTooltip,
-              onPressed: _togglePause,
+              onPressed: _gameState.runStatus == FlapToFlyRunStatus.gameOver
+                  ? null
+                  : _togglePause,
               icon: Icon(
                 _gameState.paused
                     ? Icons.play_arrow_rounded
@@ -122,6 +125,74 @@ class _FlapToFlyScreenState extends State<FlapToFlyScreen> {
                             );
                           },
                         ),
+                        AnimatedBuilder(
+                          animation: _gameState,
+                          builder: (context, _) {
+                            if (_gameState.runStatus !=
+                                FlapToFlyRunStatus.gameOver) {
+                              return const SizedBox.shrink();
+                            }
+                            return ColoredBox(
+                              color: ArcadeColors.background.withValues(
+                                alpha: 0.88,
+                              ),
+                              child: Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(20),
+                                  child: Semantics(
+                                    liveRegion: true,
+                                    container: true,
+                                    label: localizations.gameOverSemantics(
+                                      _gameState.score,
+                                    ),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          localizations.gameOver,
+                                          textAlign: TextAlign.center,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .headlineMedium
+                                              ?.copyWith(
+                                                color:
+                                                    ArcadeColors.arcadeYellow,
+                                                fontWeight: FontWeight.w900,
+                                              ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          localizations.gameScore(
+                                            _gameState.score,
+                                          ),
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleLarge
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.w900,
+                                              ),
+                                        ),
+                                        const SizedBox(height: 14),
+                                        FilledButton.icon(
+                                          key: const Key(
+                                            'game-over-restart-button',
+                                          ),
+                                          onPressed: _game.restartGame,
+                                          icon: const Icon(
+                                            Icons.replay_rounded,
+                                          ),
+                                          label: Text(
+                                            localizations.gameRestartAction,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
                       ],
                     ),
                   ),
@@ -131,8 +202,9 @@ class _FlapToFlyScreenState extends State<FlapToFlyScreen> {
             AnimatedBuilder(
               animation: _gameState,
               builder: (context, _) => _GameControls(
-                actionCount: _gameState.actionCount,
+                score: _gameState.score,
                 paused: _gameState.paused,
+                runStatus: _gameState.runStatus,
                 onPrimaryAction: _triggerTouchAction,
               ),
             ),
@@ -160,29 +232,43 @@ class _FlapToFlyScreenState extends State<FlapToFlyScreen> {
 
 class _GameControls extends StatelessWidget {
   const _GameControls({
-    required this.actionCount,
+    required this.score,
     required this.paused,
+    required this.runStatus,
     required this.onPrimaryAction,
   });
 
-  final int actionCount;
+  final int score;
   final bool paused;
+  final FlapToFlyRunStatus runStatus;
   final VoidCallback onPrimaryAction;
 
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context);
-    final status = paused ? localizations.gamePaused : localizations.gameReady;
+    final status = paused
+        ? localizations.gamePaused
+        : switch (runStatus) {
+            FlapToFlyRunStatus.ready => localizations.gameReady,
+            FlapToFlyRunStatus.running => localizations.gameFlying,
+            FlapToFlyRunStatus.gameOver => localizations.gameOver,
+          };
+    final instruction = switch (runStatus) {
+      FlapToFlyRunStatus.ready => localizations.gameReadyInstruction,
+      FlapToFlyRunStatus.running => localizations.gameFlyingInstruction,
+      FlapToFlyRunStatus.gameOver => localizations.gameOverInstruction,
+    };
+    final inputEnabled = !paused && runStatus != FlapToFlyRunStatus.gameOver;
     final details = Semantics(
       container: true,
       liveRegion: true,
-      label: localizations.gameStatusSemantics(status, actionCount),
+      label: localizations.gameStatusSemantics(status, score, instruction),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            localizations.gamePreviewLabel,
+            status.toUpperCase(),
             style: const TextStyle(
               color: ArcadeColors.arcadeYellow,
               fontWeight: FontWeight.w900,
@@ -191,24 +277,24 @@ class _GameControls extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            localizations.gameActionCount(actionCount),
+            localizations.gameScore(score),
             style: Theme.of(
               context,
             ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
           ),
           const SizedBox(height: 4),
-          Text(localizations.gameInputInstructions),
+          Text(instruction),
         ],
       ),
     );
     final actionButton = Semantics(
       key: const Key('game-primary-action'),
       button: true,
-      enabled: !paused,
+      enabled: inputEnabled,
       label: localizations.gamePrimaryActionSemantics,
       excludeSemantics: true,
       child: FilledButton.icon(
-        onPressed: paused ? null : onPrimaryAction,
+        onPressed: inputEnabled ? onPrimaryAction : null,
         icon: const Icon(Icons.keyboard_double_arrow_up_rounded, size: 30),
         label: Text(localizations.gamePrimaryAction),
         style: FilledButton.styleFrom(
