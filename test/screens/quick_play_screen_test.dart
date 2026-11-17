@@ -1,8 +1,8 @@
-import 'package:adaptive_motion_arcade/l10n/app_localizations.dart';
 import 'package:adaptive_motion_arcade/screens/quick_play_screen.dart';
-import 'package:adaptive_motion_arcade/theme/arcade_theme.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+
+import '../test_support/localized_test_app.dart';
 
 void main() {
   testWidgets('shows three supported movements and a disabled leg tile', (
@@ -11,7 +11,7 @@ void main() {
     final semantics = tester.ensureSemantics();
 
     await tester.pumpWidget(
-      _localizedTestApp(home: const QuickPlayScreen()),
+      localizedTestApp(home: const QuickPlayScreen()),
     );
 
     expect(find.text('Head'), findsOneWidget);
@@ -34,7 +34,7 @@ void main() {
 
   testWidgets('a supported movement opens calibration', (tester) async {
     await tester.pumpWidget(
-      _localizedTestApp(
+      localizedTestApp(
         home: QuickPlayScreen(
           cameraScreenBuilder: (_) =>
               const Scaffold(body: Text('Calibration route')),
@@ -58,7 +58,7 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
 
     await tester.pumpWidget(
-      _localizedTestApp(home: const QuickPlayScreen()),
+      localizedTestApp(home: const QuickPlayScreen()),
     );
 
     expect(tester.takeException(), isNull);
@@ -73,7 +73,7 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
 
     await tester.pumpWidget(
-      _localizedTestApp(home: const QuickPlayScreen()),
+      localizedTestApp(home: const QuickPlayScreen()),
     );
 
     final headTop = tester.getTopLeft(find.byKey(const Key('movement-head')));
@@ -82,13 +82,30 @@ void main() {
     expect(legTop.dx, greaterThan(headTop.dx));
     expect(tester.takeException(), isNull);
   });
-}
 
-Widget _localizedTestApp({required Widget home}) {
-  return MaterialApp(
-    localizationsDelegates: AppLocalizations.localizationsDelegates,
-    supportedLocales: AppLocalizations.supportedLocales,
-    theme: buildArcadeTheme(),
-    home: home,
-  );
+  testWidgets('Spanish copy and semantics fit a narrow phone', (tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(320, 700);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetPhysicalSize);
+    final semantics = tester.ensureSemantics();
+
+    await tester.pumpWidget(
+      localizedTestApp(
+        locale: const Locale('es'),
+        home: const QuickPlayScreen(),
+      ),
+    );
+
+    expect(find.text('Juego rápido'), findsOneWidget);
+    expect(find.text('¿Qué movimiento te resulta cómodo hoy?'), findsOneWidget);
+    expect(find.text('Mano / Muñeca'), findsOneWidget);
+    expect(find.text('PRÓXIMAMENTE'), findsOneWidget);
+    expect(
+      tester.getSemantics(find.byKey(const Key('movement-head'))).label,
+      contains('Cabeza. Inclínala a la izquierda o a la derecha.'),
+    );
+    expect(tester.takeException(), isNull);
+    semantics.dispose();
+  });
 }

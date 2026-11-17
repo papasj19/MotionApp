@@ -151,18 +151,22 @@ and worksheet are in `validation/STAGE_07_DEVICE_VALIDATION.md`. The recorded
 Android POC pass covers the core observable behaviors; unrecorded quantitative
 fields and additional device conditions remain explicitly pending.
 
-## Localization foundation
+## English and Spanish support
 
-Flutter's generated localization system is configured with English as the
-source catalog in `lib/l10n/app_en.arb`. The app follows supported device
-locales and falls back to English. Quick Play is the first fully extracted
-flow, including visible copy, tooltips and screen-reader descriptions.
+The current POC journey fully supports English and Spanish. English remains the
+source catalog in `lib/l10n/app_en.arb`, with the matching Spanish catalog in
+`lib/l10n/app_es.arb`. The app initially follows the device language, falling
+back to English, and the lobby provides a one-tap English/Español switch. The
+selection is stored locally on that device and restored the next time the app
+opens.
 
-No second language has been selected yet, and the remaining screens still need
-their user-facing copy extracted. Services and calibration models that
-currently produce English sentences should eventually return semantic status
-values so the interface can translate them without mixing language into motion
-logic.
+Lobby, Quick Play, camera, calibration, control-test, status, error, tooltip
+and screen-reader wording are translated. Numeric diagnostics also use the
+active language's decimal format, and the iOS camera-permission explanation is
+available in both languages. Motion and calibration logic continue to expose
+semantic states so internal diagnostic sentences do not leak into the
+interface. New screens must add matching entries to both ARB catalogs and test
+both locales before they are considered complete.
 
 ## Hand-tracking technology decision
 

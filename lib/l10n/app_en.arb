@@ -1,81 +1,334 @@
 {
   "@@locale": "en",
   "appTitle": "Adaptive Motion Arcade",
-  "@appTitle": {
-    "description": "The application name shown by Flutter."
+  "languageSelectionLabel": "App language",
+  "languageEnglish": "English",
+  "languageSpanish": "Español",
+  "homeTitleLineOne": "ADAPTIVE MOTION",
+  "homeTitleLineTwo": "ARCADE",
+  "homeCompactWelcome": "Ready to play your way?",
+  "homeWelcome": "Welcome! Choose how you want to play today.",
+  "homeQuickPlay": "Quick Play",
+  "homeQuickPlayDescription": "Play without a profile",
+  "homeSchool": "School",
+  "homeSchoolDescription": "Planned after teacher feedback",
+  "optionSemantics": "{label}. {description}.",
+  "@optionSemantics": {
+    "placeholders": {
+      "label": {"type": "String"},
+      "description": {"type": "String"}
+    }
   },
   "arcadeLobbyTooltip": "Arcade lobby",
-  "@arcadeLobbyTooltip": {
-    "description": "Tooltip for returning to the main arcade lobby."
-  },
   "quickPlayTitle": "Quick Play",
-  "@quickPlayTitle": {
-    "description": "Title of the quick-play setup screen."
-  },
   "quickPlayChooseMovementStep": "STEP 1 • CHOOSE MOVEMENT",
-  "@quickPlayChooseMovementStep": {
-    "description": "First quick-play setup step. Preserve the meaning rather than the capitalization when translating."
-  },
   "quickPlayComfortQuestion": "What feels comfortable today?",
-  "@quickPlayComfortQuestion": {
-    "description": "Heading inviting the player to choose a comfortable movement."
-  },
   "quickPlayCompanionPrompt": "Pick one movement. We will measure what feels good today.",
-  "@quickPlayCompanionPrompt": {
-    "description": "Child-friendly companion guidance on the quick-play screen."
-  },
   "movementHeadLabel": "Head",
-  "@movementHeadLabel": {
-    "description": "Label for head movement control."
-  },
   "movementHeadDescription": "Tilt left or right",
-  "@movementHeadDescription": {
-    "description": "Short description of the supported head movement."
-  },
   "movementWristLabel": "Hand / Wrist",
-  "@movementWristLabel": {
-    "description": "Label for wrist movement control."
-  },
   "movementWristDescription": "Bend your wrist",
-  "@movementWristDescription": {
-    "description": "Short description of the supported wrist movement."
-  },
   "movementFingerLabel": "Finger",
-  "@movementFingerLabel": {
-    "description": "Label for index-finger movement control."
-  },
   "movementFingerDescription": "Bend your index finger",
-  "@movementFingerDescription": {
-    "description": "Short description of the supported finger movement."
-  },
   "movementLegLabel": "Leg",
-  "@movementLegLabel": {
-    "description": "Label for a future leg movement control."
-  },
   "movementLegDescription": "Planned for a later version",
-  "@movementLegDescription": {
-    "description": "Explanation that leg movement is not available yet."
-  },
   "movementTileSemantics": "{label}. {description}.",
   "@movementTileSemantics": {
-    "description": "Screen-reader description for a movement choice.",
     "placeholders": {
-      "label": {
-        "type": "String",
-        "example": "Head"
-      },
-      "description": {
-        "type": "String",
-        "example": "Tilt left or right"
-      }
+      "label": {"type": "String"},
+      "description": {"type": "String"}
     }
   },
   "comingLater": "COMING LATER",
-  "@comingLater": {
-    "description": "Badge for a feature that is not available yet. Preserve the meaning rather than the capitalization when translating."
-  },
   "quickPlayComfortNote": "Choose what is comfortable now. The next step measures your movement—it never asks you to stretch farther.",
-  "@quickPlayComfortNote": {
-    "description": "Safety guidance that calibration uses comfortable movement rather than maximum range."
-  }
+  "movementShortLabel": "{movement, select, finger{Finger} wrist{Wrist} head{Head} other{Movement}}",
+  "@movementShortLabel": {
+    "placeholders": {"movement": {"type": "String"}}
+  },
+  "movementSelectionDescription": "{movement, select, finger{Bend and straighten the index finger comfortably.} wrist{Bend the wrist comfortably in either direction.} head{Tilt the head comfortably left or right.} other{Move comfortably.}}",
+  "@movementSelectionDescription": {
+    "placeholders": {"movement": {"type": "String"}}
+  },
+  "movementPositioningHint": "{movement, select, finger{Show one hand clearly, including the full index finger.} wrist{Show one hand, the wrist, and the forearm up to the elbow.} head{Center the face and keep both eyes visible.} other{Move fully into view.}}",
+  "@movementPositioningHint": {
+    "placeholders": {"movement": {"type": "String"}}
+  },
+  "movementRestPrompt": "{movement, select, finger{Keep the hand comfortably at rest while the baseline is measured.} wrist{Keep the wrist comfortably at rest while the baseline is measured.} head{Keep the head comfortably at rest while the baseline is measured.} other{Rest comfortably while the baseline is measured.}}",
+  "@movementRestPrompt": {
+    "placeholders": {"movement": {"type": "String"}}
+  },
+  "movementPrompt": "{movement, select, finger{Make one comfortable finger bend or straighten movement.} wrist{Make one comfortable wrist bend in either direction.} head{Make one comfortable head tilt to the left or right.} other{Make one comfortable movement.}}",
+  "@movementPrompt": {
+    "placeholders": {"movement": {"type": "String"}}
+  },
+  "movementIncreasingDirection": "{movement, select, finger{More bend} wrist{More wrist bend} head{Tilt left} other{First direction}}",
+  "@movementIncreasingDirection": {
+    "placeholders": {"movement": {"type": "String"}}
+  },
+  "movementDecreasingDirection": "{movement, select, finger{More straight} wrist{More straight} head{Tilt right} other{Other direction}}",
+  "@movementDecreasingDirection": {
+    "placeholders": {"movement": {"type": "String"}}
+  },
+  "movementTrackingSubject": "{movement, select, finger{hand} wrist{hand} head{face} other{tracked area}}",
+  "@movementTrackingSubject": {
+    "placeholders": {"movement": {"type": "String"}}
+  },
+  "movementReadyInstruction": "{movement, select, finger{Make one comfortable finger movement.} wrist{Make one comfortable wrist movement.} head{Make one comfortable head movement.} other{Make one comfortable movement.}}",
+  "@movementReadyInstruction": {
+    "placeholders": {"movement": {"type": "String"}}
+  },
+  "calibrationScreenTitle": "{movement} calibration",
+  "@calibrationScreenTitle": {
+    "placeholders": {"movement": {"type": "String"}}
+  },
+  "controlTestScreenTitle": "{movement} control test",
+  "@controlTestScreenTitle": {
+    "placeholders": {"movement": {"type": "String"}}
+  },
+  "changeMovement": "Change",
+  "livePreviewPrivacy": "Live preview only. Nothing is recorded or saved.",
+  "chooseMovementTitle": "Choose a movement",
+  "chooseMovementQuestion": "What comfortable movement will control the game?",
+  "chooseMovementHelp": "A caregiver can choose the clearest option. Calibration measures the player’s current comfortable movement and never asks for a maximum range. Head control uses left/right tilt only; it does not use blinking or facial expressions.",
+  "preparingMovementTracking": "Preparing movement tracking",
+  "trackingPaused": "Tracking paused",
+  "startingTracking": "Starting tracking…",
+  "trackingUnavailable": "Tracking unavailable",
+  "movementTrackingPausedSemantics": "Movement tracking paused.",
+  "movementTrackingStartingSemantics": "Starting movement tracking.",
+  "movementTrackingActiveSemantics": "{movement} movement is being tracked.",
+  "@movementTrackingActiveSemantics": {
+    "placeholders": {"movement": {"type": "String"}}
+  },
+  "movementTrackingUnavailableSemantics": "Movement tracking is unavailable.",
+  "trackingDetected": "{movement} detected • {fps} FPS",
+  "@trackingDetected": {
+    "placeholders": {
+      "movement": {"type": "String"},
+      "fps": {"type": "int"}
+    }
+  },
+  "trackingDetectedWithLatency": "{movement} detected • {fps} FPS • {latency} ms",
+  "@trackingDetectedWithLatency": {
+    "placeholders": {
+      "movement": {"type": "String"},
+      "fps": {"type": "int"},
+      "latency": {"type": "int"}
+    }
+  },
+  "cameraPreviewLoading": "Camera preview loading",
+  "cameraPreviewUnavailable": "Camera preview unavailable",
+  "cameraTitleStarting": "Starting camera",
+  "cameraTitleReady": "Camera ready",
+  "cameraTitleNoFrontCamera": "Front camera unavailable",
+  "cameraTitlePermissionNeeded": "Camera permission needed",
+  "cameraTitleAccessRestricted": "Camera access restricted",
+  "cameraTitlePaused": "Camera paused",
+  "cameraTitleUnavailable": "Camera unavailable",
+  "cameraMessageStarting": "Starting the front camera…",
+  "cameraMessageAdjustingOrientation": "Adjusting camera orientation…",
+  "cameraMessageReady": "The front camera preview is ready.",
+  "cameraMessageNoFrontCamera": "No front-facing camera was found on this device.",
+  "cameraMessagePermissionDenied": "Camera access was denied. Allow camera access in device settings, then try again.",
+  "cameraMessagePermissionRestricted": "Camera access is restricted on this device.",
+  "cameraMessagePaused": "Camera paused while the app is not active.",
+  "cameraMessageFailure": "The camera could not start. Please try again.",
+  "cameraStatusSemantics": "Camera status. {title}. {message}",
+  "@cameraStatusSemantics": {
+    "placeholders": {
+      "title": {"type": "String"},
+      "message": {"type": "String"}
+    }
+  },
+  "tryAgain": "Try again",
+  "calibrationTitle": "Comfortable movement calibration",
+  "calibrationIntroduction": "A caregiver can guide two short steps. Keep every movement comfortable—never push for a maximum range.",
+  "selectedMovement": "Selected movement: {movement}.",
+  "@selectedMovement": {
+    "placeholders": {"movement": {"type": "String"}}
+  },
+  "startRestMeasurement": "Start rest measurement",
+  "calibrationStepOne": "Step 1 of 2 • Rest comfortably",
+  "stableSamples": "{count, plural, =0{Stable samples: 0} =1{Stable sample: 1} other{Stable samples: {count}}}",
+  "@stableSamples": {
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "retryRestMeasurement": "Retry rest measurement",
+  "restMeasurementComplete": "Rest measurement complete",
+  "restEstimateNext": "Rest estimate: ~{value}°. Next, {prompt}",
+  "@restEstimateNext": {
+    "placeholders": {
+      "value": {"type": "String"},
+      "prompt": {"type": "String"}
+    }
+  },
+  "measureComfortableMovement": "Measure comfortable movement",
+  "calibrationStepTwo": "Step 2 of 2 • Move comfortably",
+  "movementPromptSafety": "{prompt} Do not push farther.",
+  "@movementPromptSafety": {
+    "placeholders": {"prompt": {"type": "String"}}
+  },
+  "retryMovement": "Retry movement",
+  "reviewManualSetting": "Review manual setting",
+  "manualThresholdUnavailable": "A reliable manual threshold is not available because the movement overlaps the measured noise. Retrying is safest.",
+  "caregiverReview": "Caregiver review",
+  "caregiverReviewInstructions": "Choose the direction and sensitivity. The threshold cannot go below measured noise or beyond the observed comfortable movement.",
+  "movementDirection": "Movement direction",
+  "sensitivityFromRest": "Sensitivity: ~{value}° from rest",
+  "@sensitivityFromRest": {
+    "placeholders": {"value": {"type": "String"}}
+  },
+  "measuredNoiseAndMovement": "Measured noise floor: ~{noise}°. Observed comfortable movement: ~{movement}°.",
+  "@measuredNoiseAndMovement": {
+    "placeholders": {
+      "noise": {"type": "String"},
+      "movement": {"type": "String"}
+    }
+  },
+  "useThisSetting": "Use this setting",
+  "calibrationReady": "Calibration ready",
+  "calibrationDirectionThreshold": "Direction: {direction}. Threshold: ~{value}° from rest.",
+  "@calibrationDirectionThreshold": {
+    "placeholders": {
+      "direction": {"type": "String"},
+      "value": {"type": "String"}
+    }
+  },
+  "calibrationNotSaved": "This calibration is not saved and clears when you leave this screen.",
+  "calibrationSuccessCompanion": "Nice job! This setting stays within the movement measured today.",
+  "testThisControl": "Test this control",
+  "calibrateAgain": "Calibrate again",
+  "calibrationSemanticReady": "Calibration ready to begin.",
+  "calibrationSemanticMeasuringRest": "Measuring comfortable rest position.",
+  "calibrationSemanticRestComplete": "Rest measurement complete. Comfortable movement is next.",
+  "calibrationSemanticMeasuringMovement": "Measuring one comfortable movement.",
+  "calibrationSemanticReview": "Calibration is ready for caregiver review.",
+  "calibrationSemanticComplete": "Calibration complete. It is not saved.",
+  "currentAngleSemantics": "Current estimated {movement} angle {value}",
+  "@currentAngleSemantics": {
+    "placeholders": {
+      "movement": {"type": "String"},
+      "value": {"type": "String"}
+    }
+  },
+  "currentAngleUnavailableSemantics": "Current {movement} angle unavailable",
+  "@currentAngleUnavailableSemantics": {
+    "placeholders": {"movement": {"type": "String"}}
+  },
+  "baselineTrackingPaused": "Tracking paused. {hint}",
+  "@baselineTrackingPaused": {
+    "placeholders": {"hint": {"type": "String"}}
+  },
+  "delayedTrackingSample": "A delayed tracking sample was ignored.",
+  "restSignalTooVariable": "The resting signal is too variable for an automatic setting. Try again or use a caregiver-adjusted setting.",
+  "restSignalStable": "The resting signal is stable enough to continue.",
+  "movementNotSeparated": "This comfortable movement was not clearly separated from normal signal variation. Retry or use a caregiver-adjusted setting.",
+  "movementRecommendationReady": "A starting threshold is available for caregiver review. It does not require a larger movement.",
+  "validationChooseSensitivity": "Choose a valid sensitivity setting.",
+  "validationBelowNoise": "This setting is below the measured noise floor of {value}°. Increase the threshold or retry calibration.",
+  "@validationBelowNoise": {
+    "placeholders": {"value": {"type": "String"}}
+  },
+  "validationBeyondComfort": "This setting is beyond the comfortable movement that was observed. Lower the threshold or retry calibration.",
+  "validationOutsideRange": "This direction and sensitivity are outside the measured signal range. Change the setting or retry calibration.",
+  "validationReliable": "This setting is above noise and within observed comfort.",
+  "controlStatusTrackingPaused": "TRACKING PAUSED",
+  "controlStatusActionPressed": "ACTION PRESSED",
+  "controlStatusReturnToRest": "RETURN TO REST",
+  "controlStatusReady": "READY",
+  "controlInstructionReposition": "Reposition the {subject} to continue.",
+  "@controlInstructionReposition": {
+    "placeholders": {"subject": {"type": "String"}}
+  },
+  "controlInstructionReturnComfortably": "Return comfortably to rest before moving again.",
+  "controlInstructionWillArm": "The control will arm after the movement returns to rest.",
+  "controlTestSemantics": "Control test. {status}. {count, plural, =0{No actions detected} =1{One action detected} other{{count} actions detected}}. {instruction}",
+  "@controlTestSemantics": {
+    "placeholders": {
+      "status": {"type": "String"},
+      "count": {"type": "int"},
+      "instruction": {"type": "String"}
+    }
+  },
+  "controlTestTitle": "Control Test",
+  "controlTestDescription": "One comfortable movement should create one action.",
+  "developerTestInput": "Developer test input",
+  "testPress": "Test press",
+  "testRelease": "Test release",
+  "validationDetails": "Validation details",
+  "caregiverEngineeringChecks": "Caregiver engineering checks",
+  "recalibrate": "Recalibrate",
+  "unavailable": "Unavailable",
+  "notAvailable": "Not available",
+  "movementTowardAction": "{value}° toward action",
+  "@movementTowardAction": {
+    "placeholders": {"value": {"type": "String"}}
+  },
+  "trackingLabel": "Tracking",
+  "movementLabel": "Movement",
+  "pressThreshold": "Press threshold",
+  "releaseThreshold": "Release threshold",
+  "actionsLabel": "Actions",
+  "lastEvent": "Last event",
+  "trackingLost": "Lost",
+  "trackingReady": "Ready",
+  "motionEventLabel": "{event, select, primaryAction{Primary action} actionDown{Action pressed} actionUp{Action released} trackingLost{Tracking lost} trackingRecovered{Tracking recovered} other{Unknown event}}",
+  "@motionEventLabel": {
+    "placeholders": {"event": {"type": "String"}}
+  },
+  "caregiverValidationSemantics": "Caregiver validation details.",
+  "validTrackingSamples": "Valid tracking samples",
+  "validTrackingSamplesValue": "{valid}/{total} ({percent}%)",
+  "@validTrackingSamplesValue": {
+    "placeholders": {
+      "valid": {"type": "int"},
+      "total": {"type": "int"},
+      "percent": {"type": "int"}
+    }
+  },
+  "detectionRate": "Detection rate",
+  "framesPerSecondValue": "{value} FPS",
+  "@framesPerSecondValue": {
+    "placeholders": {"value": {"type": "String"}}
+  },
+  "processingDelayMedian": "Processing delay median",
+  "millisecondsValue": "{value} ms",
+  "@millisecondsValue": {
+    "placeholders": {"value": {"type": "int"}}
+  },
+  "droppedFrames": "Dropped frames",
+  "observedSignalNoise": "Observed signal/noise",
+  "ratioValue": "{value}×",
+  "@ratioValue": {
+    "placeholders": {"value": {"type": "String"}}
+  },
+  "signalRiseToAction": "Signal rise to action",
+  "completeAnAction": "Complete an action",
+  "millisecondsMedianValue": "{value} ms median",
+  "@millisecondsMedianValue": {
+    "placeholders": {"value": {"type": "int"}}
+  },
+  "engineeringDiagnosticsNote": "These are engineering diagnostics, not clinical measurements. Signal timing starts when the camera estimate rises above the measured noise floor; it is not a measurement of physical reaction time.",
+  "fingerDiagnosticSemantics": "Index finger flexion diagnostic. {value}. {state}. {detail}",
+  "@fingerDiagnosticSemantics": {
+    "placeholders": {
+      "value": {"type": "String"},
+      "state": {"type": "String"},
+      "detail": {"type": "String"}
+    }
+  },
+  "fingerFlexionTitle": "Index finger flexion",
+  "fingerAngleExplanation": "0° is straight; a larger angle means more bend.",
+  "fingerStateSteady": "Steady",
+  "fingerStateBending": "Bending",
+  "fingerStateStraightening": "Straightening",
+  "fingerWaitingTracking": "Waiting for hand tracking to become available.",
+  "fingerShowHand": "Show one hand to measure the index finger.",
+  "fingerWaitingCurrentFrame": "Waiting for a current tracking frame.",
+  "fingerMoveFullyIntoView": "Move the hand fully into view for a stable measurement.",
+  "fingerWaitingMeasurement": "Waiting for a measurement.",
+  "signalGeometryUsable": "Signal geometry: usable",
+  "signalGeometrySettling": "Signal geometry: settling",
+  "signalGeometryUnavailable": "Signal geometry: unavailable",
+  "joybitDescription": "Joybit, a friendly lavender hedgehog wearing arcade headphones."
 }

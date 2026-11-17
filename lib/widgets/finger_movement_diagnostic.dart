@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../l10n/app_localizations.dart';
 import '../movement/finger_movement_analyzer.dart';
 
 class FingerMovementDiagnostic extends StatelessWidget {
@@ -9,20 +10,22 @@ class FingerMovementDiagnostic extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final valueLabel = reading.isValid
-        ? '~${reading.flexionDegrees!.round()}°'
-        : '—';
-    final stateLabel = _stateLabel(reading);
+    final localizations = AppLocalizations.of(context);
+    final valueLabel =
+        reading.isValid ? '~${reading.flexionDegrees!.round()}°' : '—';
+    final stateLabel = _stateLabel(localizations, reading);
     final detailLabel = reading.isValid
-        ? '0° is straight; a larger angle means more bend.'
-        : _invalidDetail(reading.validity);
+        ? localizations.fingerAngleExplanation
+        : _invalidDetail(localizations, reading.validity);
     final colorScheme = Theme.of(context).colorScheme;
 
     return Semantics(
       container: true,
-      label:
-          'Index finger flexion diagnostic. $valueLabel. $stateLabel. '
-          '$detailLabel',
+      label: localizations.fingerDiagnosticSemantics(
+        valueLabel,
+        stateLabel,
+        detailLabel,
+      ),
       child: ExcludeSemantics(
         child: Card(
           margin: EdgeInsets.zero,
@@ -38,17 +41,20 @@ class FingerMovementDiagnostic extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        'Index finger flexion',
+                        localizations.fingerFlexionTitle,
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                              fontWeight: FontWeight.bold,
+                            ),
                       ),
                       const SizedBox(height: 2),
                       Text(detailLabel, maxLines: 2),
                       if (reading.isValid) ...[
                         const SizedBox(height: 2),
                         Text(
-                          _qualityLabel(reading.quality.quality),
+                          _qualityLabel(
+                            localizations,
+                            reading.quality.quality,
+                          ),
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                       ],
@@ -62,11 +68,11 @@ class FingerMovementDiagnostic extends StatelessWidget {
                   children: [
                     Text(
                       valueLabel,
-                      style: Theme.of(context).textTheme.headlineSmall
-                          ?.copyWith(
-                            color: colorScheme.primary,
-                            fontWeight: FontWeight.bold,
-                          ),
+                      style:
+                          Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                color: colorScheme.primary,
+                                fontWeight: FontWeight.bold,
+                              ),
                     ),
                     Text(
                       stateLabel,
@@ -82,38 +88,46 @@ class FingerMovementDiagnostic extends StatelessWidget {
     );
   }
 
-  String _stateLabel(FingerMovementReading reading) {
+  String _stateLabel(
+    AppLocalizations localizations,
+    FingerMovementReading reading,
+  ) {
     if (!reading.isValid) {
-      return 'Unavailable';
+      return localizations.unavailable;
     }
     return switch (reading.state) {
-      FingerMotionState.stationary => 'Steady',
-      FingerMotionState.flexing => 'Bending',
-      FingerMotionState.extending => 'Straightening',
-      FingerMotionState.unavailable => 'Unavailable',
+      FingerMotionState.stationary => localizations.fingerStateSteady,
+      FingerMotionState.flexing => localizations.fingerStateBending,
+      FingerMotionState.extending => localizations.fingerStateStraightening,
+      FingerMotionState.unavailable => localizations.unavailable,
     };
   }
 
-  String _invalidDetail(FingerMovementValidity validity) {
+  String _invalidDetail(
+    AppLocalizations localizations,
+    FingerMovementValidity validity,
+  ) {
     return switch (validity) {
       FingerMovementValidity.trackingUnavailable =>
-        'Waiting for hand tracking to become available.',
-      FingerMovementValidity.missingObservation =>
-        'Show one hand to measure the index finger.',
+        localizations.fingerWaitingTracking,
+      FingerMovementValidity.missingObservation => localizations.fingerShowHand,
       FingerMovementValidity.outOfOrderTimestamp =>
-        'Waiting for a current tracking frame.',
+        localizations.fingerWaitingCurrentFrame,
       FingerMovementValidity.nonFiniteLandmarks ||
       FingerMovementValidity.degenerateGeometry =>
-        'Move the hand fully into view for a stable measurement.',
-      FingerMovementValidity.valid => 'Waiting for a measurement.',
+        localizations.fingerMoveFullyIntoView,
+      FingerMovementValidity.valid => localizations.fingerWaitingMeasurement,
     };
   }
 
-  String _qualityLabel(MovementSignalQuality quality) {
+  String _qualityLabel(
+    AppLocalizations localizations,
+    MovementSignalQuality quality,
+  ) {
     return switch (quality) {
-      MovementSignalQuality.good => 'Signal geometry: usable',
-      MovementSignalQuality.caution => 'Signal geometry: settling',
-      MovementSignalQuality.invalid => 'Signal geometry: unavailable',
+      MovementSignalQuality.good => localizations.signalGeometryUsable,
+      MovementSignalQuality.caution => localizations.signalGeometrySettling,
+      MovementSignalQuality.invalid => localizations.signalGeometryUnavailable,
     };
   }
 }

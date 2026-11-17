@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../l10n/app_localizations.dart';
 import '../theme/arcade_theme.dart';
 
 class JoybitCompanion extends StatelessWidget {
@@ -57,9 +58,10 @@ class _JoybitPortrait extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     return Semantics(
       image: true,
-      label: 'Joybit, a friendly lavender hedgehog wearing arcade headphones.',
+      label: localizations.joybitDescription,
       child: ExcludeSemantics(
         child: Container(
           width: size,

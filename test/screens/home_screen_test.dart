@@ -1,14 +1,15 @@
-import 'package:adaptive_motion_arcade/l10n/app_localizations.dart';
 import 'package:adaptive_motion_arcade/screens/home_screen.dart';
 import 'package:adaptive_motion_arcade/screens/quick_play_screen.dart';
-import 'package:adaptive_motion_arcade/theme/arcade_theme.dart';
+import 'package:adaptive_motion_arcade/l10n/locale_controller.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+
+import '../test_support/localized_test_app.dart';
 
 void main() {
   testWidgets('shows the responsive arcade lobby', (tester) async {
     await tester.pumpWidget(
-      _localizedTestApp(home: const HomeScreen()),
+      localizedTestApp(home: const HomeScreen()),
     );
 
     expect(find.text('ADAPTIVE MOTION'), findsOneWidget);
@@ -24,7 +25,7 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(
-      _localizedTestApp(
+      localizedTestApp(
         home: HomeScreen(
           cameraScreenBuilder: (_) =>
               const Scaffold(body: Text('Injected camera screen')),
@@ -49,7 +50,7 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(
-      _localizedTestApp(home: const HomeScreen()),
+      localizedTestApp(home: const HomeScreen()),
     );
 
     await tester.tap(find.byKey(const Key('school-button')));
@@ -59,6 +60,33 @@ void main() {
     expect(find.text('Planned after teacher feedback'), findsOneWidget);
   });
 
+  testWidgets('switches between English and Spanish and remembers the choice', (
+    tester,
+  ) async {
+    final store = MemoryLanguagePreferenceStore();
+    final controller = LocaleController(preferenceStore: store);
+    await tester.pumpWidget(
+      localizedTestApp(
+        home: const HomeScreen(),
+        localeController: controller,
+      ),
+    );
+
+    expect(find.text('Quick Play'), findsOneWidget);
+    await tester.tap(find.text('Español'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Juego rápido'), findsOneWidget);
+    expect(find.text('Escuela'), findsOneWidget);
+    expect(store.languageCode, 'es');
+
+    await tester.tap(find.text('English'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Quick Play'), findsOneWidget);
+    expect(store.languageCode, 'en');
+  });
+
   testWidgets('lobby fits a compact landscape phone', (tester) async {
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = const Size(640, 360);
@@ -66,7 +94,7 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
 
     await tester.pumpWidget(
-      _localizedTestApp(
+      localizedTestApp(
         builder: (context, child) => MediaQuery(
           data: MediaQuery.of(
             context,
@@ -81,17 +109,4 @@ void main() {
     expect(find.text('Quick Play'), findsOneWidget);
     expect(find.text('School'), findsOneWidget);
   });
-}
-
-Widget _localizedTestApp({
-  required Widget home,
-  TransitionBuilder? builder,
-}) {
-  return MaterialApp(
-    localizationsDelegates: AppLocalizations.localizationsDelegates,
-    supportedLocales: AppLocalizations.supportedLocales,
-    theme: buildArcadeTheme(),
-    builder: builder,
-    home: home,
-  );
 }

@@ -5,6 +5,8 @@ import 'package:adaptive_motion_arcade/widgets/calibration_panel.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../test_support/localized_test_app.dart';
+
 void main() {
   const setupContext = CalibrationSetupContext(
     orientation: CalibrationDeviceOrientation.portrait,
@@ -67,7 +69,7 @@ void main() {
     await tester.pump();
 
     expect(find.text('Calibration ready'), findsOneWidget);
-    expect(find.textContaining('Direction: more bend'), findsOneWidget);
+    expect(find.textContaining('Direction: More bend'), findsOneWidget);
     expect(
       find.textContaining('not saved and clears when you leave this screen'),
       findsOneWidget,
@@ -140,6 +142,40 @@ void main() {
     );
     expect(find.textContaining('failed'), findsNothing);
   });
+
+  testWidgets('shows calibration guidance in Spanish', (tester) async {
+    await _pumpReading(
+      tester,
+      _reading(0, 20),
+      setupContext,
+      completedAt,
+      locale: const Locale('es'),
+    );
+
+    expect(find.text('Calibración del movimiento cómodo'), findsOneWidget);
+    expect(find.text('Movimiento elegido: Dedo.'), findsOneWidget);
+    expect(find.text('Iniciar la medición en reposo'), findsOneWidget);
+
+    await tester.tap(find.text('Iniciar la medición en reposo'));
+    await tester.pump();
+    await _pumpReading(
+      tester,
+      FingerMovementReading.unavailable(
+        timestamp: const Duration(milliseconds: 250),
+        validity: FingerMovementValidity.missingObservation,
+        note: 'Internal diagnostic only.',
+      ),
+      setupContext,
+      completedAt,
+      locale: const Locale('es'),
+    );
+
+    expect(
+      find.textContaining('Seguimiento en pausa.'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('Internal diagnostic'), findsNothing);
+  });
 }
 
 Future<void> _reachMovementStep(
@@ -168,9 +204,11 @@ Future<void> _pumpReading(
   CalibrationSetupContext setupContext,
   DateTime completedAt, {
   ValueChanged<CalibrationProfile>? onControlTestRequested,
+  Locale locale = const Locale('en'),
 }) {
   return tester.pumpWidget(
-    MaterialApp(
+    localizedTestApp(
+      locale: locale,
       home: Scaffold(
         body: SingleChildScrollView(
           child: CalibrationPanel(

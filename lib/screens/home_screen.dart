@@ -1,7 +1,9 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../l10n/app_localizations.dart';
 import '../theme/arcade_theme.dart';
 import '../widgets/joybit_companion.dart';
+import '../widgets/language_switcher.dart';
 import 'quick_play_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -36,6 +38,11 @@ class HomeScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
+                        const Align(
+                          alignment: AlignmentDirectional.centerEnd,
+                          child: LanguageSwitcher(),
+                        ),
+                        SizedBox(height: compact ? 8 : 12),
                         const _LobbyHeading(),
                         SizedBox(height: compact ? 8 : 16),
                         Expanded(child: _ArcadeScene(compact: compact)),
@@ -59,8 +66,7 @@ class HomeScreen extends StatelessWidget {
   void _openQuickPlay(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder:
-            quickPlayScreenBuilder ??
+        builder: quickPlayScreenBuilder ??
             (_) => QuickPlayScreen(cameraScreenBuilder: cameraScreenBuilder),
       ),
     );
@@ -72,28 +78,29 @@ class _LobbyHeading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     return Semantics(
       header: true,
       child: Column(
         children: [
           Text(
-            'ADAPTIVE MOTION',
+            localizations.homeTitleLineOne,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: ArcadeColors.electricCyan,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 2,
-            ),
+                  color: ArcadeColors.electricCyan,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 2,
+                ),
           ),
           const SizedBox(height: 2),
           Text(
-            'ARCADE',
+            localizations.homeTitleLineTwo,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              color: ArcadeColors.arcadeYellow,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 3,
-            ),
+                  color: ArcadeColors.arcadeYellow,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 3,
+                ),
           ),
         ],
       ),
@@ -108,6 +115,7 @@ class _ArcadeScene extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     return Stack(
       alignment: Alignment.center,
       children: [
@@ -132,8 +140,8 @@ class _ArcadeScene extends StatelessWidget {
           child: JoybitCompanion(
             compact: compact,
             message: compact
-                ? 'Ready to play your way?'
-                : 'Welcome! Choose how you want to play today.',
+                ? localizations.homeCompactWelcome
+                : localizations.homeWelcome,
           ),
         ),
       ],
@@ -166,8 +174,8 @@ class _CabinetColumn extends StatelessWidget {
       child: LayoutBuilder(
         builder: (context, constraints) {
           final cabinetHeight = compact ? 62.0 : 96.0;
-          final visibleCabinets = (constraints.maxHeight ~/ cabinetHeight)
-              .clamp(0, cabinets);
+          final visibleCabinets =
+              (constraints.maxHeight ~/ cabinetHeight).clamp(0, cabinets);
           return Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -268,6 +276,7 @@ class _LobbyActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 760),
@@ -278,8 +287,8 @@ class _LobbyActions extends StatelessWidget {
               Expanded(
                 child: _LobbyModeButton(
                   key: const Key('quick-play-button'),
-                  label: 'Quick Play',
-                  supportingText: 'Play without a profile',
+                  label: localizations.homeQuickPlay,
+                  supportingText: localizations.homeQuickPlayDescription,
                   icon: Icons.home_rounded,
                   accent: ArcadeColors.electricCyan,
                   compact: compact,
@@ -290,8 +299,8 @@ class _LobbyActions extends StatelessWidget {
               Expanded(
                 child: _LobbyModeButton(
                   key: const Key('school-button'),
-                  label: 'School',
-                  supportingText: 'Planned after teacher feedback',
+                  label: localizations.homeSchool,
+                  supportingText: localizations.homeSchoolDescription,
                   icon: Icons.school_rounded,
                   accent: ArcadeColors.softPink,
                   compact: compact,
@@ -326,10 +335,11 @@ class _LobbyModeButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final enabled = onTap != null;
+    final localizations = AppLocalizations.of(context);
     return Semantics(
       button: true,
       enabled: enabled,
-      label: '$label. $supportingText.',
+      label: localizations.optionSemantics(label, supportingText),
       child: Opacity(
         opacity: enabled ? 1 : 0.72,
         child: Material(
@@ -355,9 +365,9 @@ class _LobbyModeButton extends StatelessWidget {
                     label,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: accent,
-                      fontWeight: FontWeight.w900,
-                    ),
+                          color: accent,
+                          fontWeight: FontWeight.w900,
+                        ),
                   ),
                   const SizedBox(height: 3),
                   Text(

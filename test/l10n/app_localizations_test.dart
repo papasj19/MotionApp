@@ -3,22 +3,36 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('English is the source locale for the localization foundation',
-      () async {
-    expect(AppLocalizations.supportedLocales, const <Locale>[Locale('en')]);
-
-    final localizations = await AppLocalizations.delegate.load(
-      const Locale('en'),
+  test('English and Spanish catalogs expose the same core interface', () async {
+    expect(
+      AppLocalizations.supportedLocales,
+      const <Locale>[Locale('en'), Locale('es')],
     );
 
-    expect(localizations.appTitle, 'Adaptive Motion Arcade');
-    expect(localizations.quickPlayTitle, 'Quick Play');
+    final english = await AppLocalizations.delegate.load(
+      const Locale('en'),
+    );
+    final spanish = await AppLocalizations.delegate.load(
+      const Locale('es'),
+    );
+
+    expect(english.appTitle, 'Adaptive Motion Arcade');
+    expect(english.quickPlayTitle, 'Quick Play');
+    expect(spanish.appTitle, 'Adaptive Motion Arcade');
+    expect(spanish.quickPlayTitle, 'Juego rápido');
     expect(
-      localizations.movementTileSemantics(
-        localizations.movementHeadLabel,
-        localizations.movementHeadDescription,
+      english.movementTileSemantics(
+        english.movementHeadLabel,
+        english.movementHeadDescription,
       ),
       'Head. Tilt left or right.',
+    );
+    expect(
+      spanish.movementTileSemantics(
+        spanish.movementHeadLabel,
+        spanish.movementHeadDescription,
+      ),
+      'Cabeza. Inclínala a la izquierda o a la derecha.',
     );
   });
 }

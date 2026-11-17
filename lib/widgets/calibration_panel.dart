@@ -3,6 +3,8 @@ import 'package:material_ui/material_ui.dart';
 import '../calibration/baseline_calibration.dart';
 import '../calibration/calibration_profile.dart';
 import '../calibration/comfortable_movement_calibration.dart';
+import '../l10n/app_localizations.dart';
+import '../l10n/localization_extensions.dart';
 import '../movement/movement_measurement.dart';
 import 'joybit_companion.dart';
 
@@ -77,9 +79,9 @@ class _CalibrationPanelState extends State<CalibrationPanel> {
         }
         return;
       case _CalibrationStep.ready ||
-          _CalibrationStep.movementReady ||
-          _CalibrationStep.review ||
-          _CalibrationStep.complete:
+            _CalibrationStep.movementReady ||
+            _CalibrationStep.review ||
+            _CalibrationStep.complete:
         return;
     }
   }
@@ -176,6 +178,7 @@ class _CalibrationPanelState extends State<CalibrationPanel> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final localizations = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -198,8 +201,10 @@ class _CalibrationPanelState extends State<CalibrationPanel> {
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        'Comfortable movement calibration',
-                        style: Theme.of(context).textTheme.titleMedium
+                        localizations.calibrationTitle,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
                             ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                     ),
@@ -231,54 +236,66 @@ class _CalibrationPanelState extends State<CalibrationPanel> {
   }
 
   Widget _buildReady() {
+    final localizations = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text(
-          'A caregiver can guide two short steps. Keep every movement '
-          'comfortable—never push for a maximum range.',
-        ),
+        Text(localizations.calibrationIntroduction),
         const SizedBox(height: 8),
-        Text('Selected movement: ${widget.movementType.shortLabel}.'),
+        Text(
+          localizations.selectedMovement(
+            localizations.movementLabelFor(widget.movementType),
+          ),
+        ),
         const SizedBox(height: 4),
-        Text(widget.movementType.selectionDescription),
+        Text(
+          localizations.movementSelectionDescriptionFor(widget.movementType),
+        ),
         if (!widget.reading.isValid) ...[
           const SizedBox(height: 8),
-          Text(widget.movementType.positioningHint),
+          Text(
+            localizations.movementPositioningHintFor(widget.movementType),
+          ),
         ],
         const SizedBox(height: 12),
         FilledButton.icon(
           onPressed: widget.reading.isValid ? _startBaseline : null,
           icon: const Icon(Icons.play_arrow),
-          label: const Text('Start rest measurement'),
+          label: Text(localizations.startRestMeasurement),
         ),
       ],
     );
   }
 
   Widget _buildBaseline() {
+    final localizations = AppLocalizations.of(context);
     final assessment = _baselineAssessment;
     final needsRetry =
         assessment?.status == BaselineCalibrationStatus.signalTooVariable;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text(
-          'Step 1 of 2 • Rest comfortably',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        Text(
+          localizations.calibrationStepOne,
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 6),
-        Text(assessment?.message ?? widget.movementType.restPrompt),
+        Text(
+          localizations.baselineAssessmentMessage(
+            widget.movementType,
+            assessment,
+          ),
+        ),
         if (assessment != null) ...[
           const SizedBox(height: 8),
-          Text('Stable samples: ${assessment.stableSampleCount}'),
+          Text(localizations.stableSamples(assessment.stableSampleCount)),
         ],
         if (needsRetry) ...[
           const SizedBox(height: 12),
           FilledButton.tonalIcon(
             onPressed: _startBaseline,
             icon: const Icon(Icons.refresh),
-            label: const Text('Retry rest measurement'),
+            label: Text(localizations.retryRestMeasurement),
           ),
         ],
       ],
@@ -286,50 +303,54 @@ class _CalibrationPanelState extends State<CalibrationPanel> {
   }
 
   Widget _buildMovementReady() {
+    final localizations = AppLocalizations.of(context);
     final baseline = _baseline!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text(
-          'Rest measurement complete',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        Text(
+          localizations.restMeasurementComplete,
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 6),
         Text(
-          'Rest estimate: ~${baseline.baselineDegrees.round()}°. '
-          'Next, ${widget.movementType.movementPrompt.toLowerCase()}',
+          localizations.restEstimateNext(
+            localizations.formatNumber(baseline.baselineDegrees),
+            localizations.movementPromptFor(widget.movementType),
+          ),
         ),
         const SizedBox(height: 12),
         FilledButton.icon(
           onPressed: widget.reading.isValid ? _startMovement : null,
           icon: const Icon(Icons.pan_tool_alt_outlined),
-          label: const Text('Measure comfortable movement'),
+          label: Text(localizations.measureComfortableMovement),
         ),
       ],
     );
   }
 
   Widget _buildMovement() {
+    final localizations = AppLocalizations.of(context);
     final assessment = _movementAssessment;
-    final notSeparated =
-        assessment?.status ==
+    final notSeparated = assessment?.status ==
         ComfortableMovementStatus.movementNotSeparatedFromNoise;
-    final canUseManual =
-        notSeparated &&
+    final canUseManual = notSeparated &&
         assessment?.observedAmplitudeDegrees != null &&
         assessment?.noiseFloorDegrees != null &&
         assessment!.observedAmplitudeDegrees! > assessment.noiseFloorDegrees!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text(
-          'Step 2 of 2 • Move comfortably',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        Text(
+          localizations.calibrationStepTwo,
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 6),
         Text(
-          assessment?.message ??
-              '${widget.movementType.movementPrompt} Do not push farther.',
+          localizations.comfortableMovementAssessmentMessage(
+            widget.movementType,
+            assessment,
+          ),
         ),
         if (notSeparated) ...[
           const SizedBox(height: 12),
@@ -340,22 +361,19 @@ class _CalibrationPanelState extends State<CalibrationPanel> {
               FilledButton.tonalIcon(
                 onPressed: _startMovement,
                 icon: const Icon(Icons.refresh),
-                label: const Text('Retry movement'),
+                label: Text(localizations.retryMovement),
               ),
               if (canUseManual)
                 OutlinedButton.icon(
                   onPressed: _useManualFallback,
                   icon: const Icon(Icons.tune),
-                  label: const Text('Review manual setting'),
+                  label: Text(localizations.reviewManualSetting),
                 ),
             ],
           ),
           if (!canUseManual) ...[
             const SizedBox(height: 8),
-            const Text(
-              'A reliable manual threshold is not available because the '
-              'movement overlaps the measured noise. Retrying is safest.',
-            ),
+            Text(localizations.manualThresholdUnavailable),
           ],
         ],
       ],
@@ -363,6 +381,7 @@ class _CalibrationPanelState extends State<CalibrationPanel> {
   }
 
   Widget _buildReview(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     final editor = _editor!;
     final validation = editor.validate(
       direction: _direction,
@@ -373,24 +392,25 @@ class _CalibrationPanelState extends State<CalibrationPanel> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text(
-          'Caregiver review',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        Text(
+          localizations.caregiverReview,
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 6),
-        const Text(
-          'Choose the direction and sensitivity. The threshold cannot go '
-          'below measured noise or beyond the observed comfortable movement.',
-        ),
+        Text(localizations.caregiverReviewInstructions),
         const SizedBox(height: 12),
-        const Text('Movement direction'),
+        Text(localizations.movementDirection),
         const SizedBox(height: 6),
         Wrap(
           spacing: 8,
           runSpacing: 8,
           children: [
             ChoiceChip(
-              label: Text(widget.movementType.increasingDirectionLabel),
+              label: Text(
+                localizations.movementIncreasingDirectionFor(
+                  widget.movementType,
+                ),
+              ),
               selected: _direction == CalibrationDirection.increasingFlexion,
               onSelected: (_) {
                 setState(() {
@@ -400,7 +420,11 @@ class _CalibrationPanelState extends State<CalibrationPanel> {
               },
             ),
             ChoiceChip(
-              label: Text(widget.movementType.decreasingDirectionLabel),
+              label: Text(
+                localizations.movementDecreasingDirectionFor(
+                  widget.movementType,
+                ),
+              ),
               selected: _direction == CalibrationDirection.decreasingFlexion,
               onSelected: (_) {
                 setState(() {
@@ -413,7 +437,9 @@ class _CalibrationPanelState extends State<CalibrationPanel> {
         ),
         const SizedBox(height: 12),
         Text(
-          'Sensitivity: ~${_thresholdOffsetDegrees.toStringAsFixed(1)}° from rest',
+          localizations.sensitivityFromRest(
+            localizations.formatNumber(_thresholdOffsetDegrees),
+          ),
         ),
         Slider(
           value: _thresholdOffsetDegrees
@@ -424,7 +450,7 @@ class _CalibrationPanelState extends State<CalibrationPanel> {
               .toDouble(),
           min: editor.minimumThresholdOffsetDegrees,
           max: editor.maximumThresholdOffsetDegrees,
-          label: '${_thresholdOffsetDegrees.toStringAsFixed(1)}°',
+          label: '${localizations.formatNumber(_thresholdOffsetDegrees)}°',
           onChanged: (value) {
             setState(() {
               _thresholdOffsetDegrees = value;
@@ -433,12 +459,18 @@ class _CalibrationPanelState extends State<CalibrationPanel> {
           },
         ),
         Text(
-          'Measured noise floor: ~${editor.noiseFloorDegrees.toStringAsFixed(1)}°. '
-          'Observed comfortable movement: '
-          '~${editor.comfortableAmplitudeDegrees.toStringAsFixed(1)}°.',
+          localizations.measuredNoiseAndMovement(
+            localizations.formatNumber(editor.noiseFloorDegrees),
+            localizations.formatNumber(editor.comfortableAmplitudeDegrees),
+          ),
         ),
         const SizedBox(height: 8),
-        Text(_validation?.message ?? validation.message),
+        Text(
+          localizations.calibrationValidationMessage(
+            (_validation ?? validation).status,
+            noiseFloorDegrees: editor.noiseFloorDegrees,
+          ),
+        ),
         const SizedBox(height: 12),
         Wrap(
           spacing: 8,
@@ -447,12 +479,12 @@ class _CalibrationPanelState extends State<CalibrationPanel> {
             FilledButton.icon(
               onPressed: validation.isReliable ? _confirmCalibration : null,
               icon: const Icon(Icons.check),
-              label: const Text('Use this setting'),
+              label: Text(localizations.useThisSetting),
             ),
             OutlinedButton.icon(
               onPressed: _startMovement,
               icon: const Icon(Icons.refresh),
-              label: const Text('Retry movement'),
+              label: Text(localizations.retryMovement),
             ),
           ],
         ),
@@ -461,62 +493,73 @@ class _CalibrationPanelState extends State<CalibrationPanel> {
   }
 
   Widget _buildComplete() {
+    final localizations = AppLocalizations.of(context);
     final profile = _profile!;
     final directionLabel =
         profile.direction == CalibrationDirection.increasingFlexion
-        ? widget.movementType.increasingDirectionLabel.toLowerCase()
-        : widget.movementType.decreasingDirectionLabel.toLowerCase();
+            ? localizations.movementIncreasingDirectionFor(widget.movementType)
+            : localizations.movementDecreasingDirectionFor(widget.movementType);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text(
-          'Calibration ready',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        Text(
+          localizations.calibrationReady,
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 6),
         Text(
-          'Direction: $directionLabel. Threshold: '
-          '~${profile.thresholdOffsetDegrees.toStringAsFixed(1)}° from rest.',
+          localizations.calibrationDirectionThreshold(
+            directionLabel,
+            localizations.formatNumber(profile.thresholdOffsetDegrees),
+          ),
         ),
         const SizedBox(height: 6),
-        const Text(
-          'This calibration is not saved and clears when you leave this screen.',
-        ),
+        Text(localizations.calibrationNotSaved),
         const SizedBox(height: 12),
-        const JoybitCompanion(
+        JoybitCompanion(
           compact: true,
-          message:
-              'Nice job! This setting stays within the movement measured today.',
+          message: localizations.calibrationSuccessCompanion,
         ),
         const SizedBox(height: 12),
         if (widget.onControlTestRequested != null) ...[
           FilledButton.icon(
             onPressed: () => widget.onControlTestRequested!(profile),
             icon: const Icon(Icons.play_arrow),
-            label: const Text('Test this control'),
+            label: Text(localizations.testThisControl),
           ),
           const SizedBox(height: 8),
         ],
         OutlinedButton.icon(
           onPressed: _startBaseline,
           icon: const Icon(Icons.restart_alt),
-          label: const Text('Calibrate again'),
+          label: Text(localizations.calibrateAgain),
         ),
       ],
     );
   }
 
-  String get _semanticStatus => switch (_step) {
-    _CalibrationStep.ready => 'Calibration ready to begin.',
-    _CalibrationStep.baseline =>
-      _baselineAssessment?.message ?? 'Measuring comfortable rest position.',
-    _CalibrationStep.movementReady =>
-      'Rest measurement complete. Comfortable movement is next.',
-    _CalibrationStep.movement =>
-      _movementAssessment?.message ?? 'Measuring one comfortable movement.',
-    _CalibrationStep.review => 'Calibration is ready for caregiver review.',
-    _CalibrationStep.complete => 'Calibration complete. It is not saved.',
-  };
+  String get _semanticStatus {
+    final localizations = AppLocalizations.of(context);
+    return switch (_step) {
+      _CalibrationStep.ready => localizations.calibrationSemanticReady,
+      _CalibrationStep.baseline => _baselineAssessment == null
+          ? localizations.calibrationSemanticMeasuringRest
+          : localizations.baselineAssessmentMessage(
+              widget.movementType,
+              _baselineAssessment,
+            ),
+      _CalibrationStep.movementReady =>
+        localizations.calibrationSemanticRestComplete,
+      _CalibrationStep.movement => _movementAssessment == null
+          ? localizations.calibrationSemanticMeasuringMovement
+          : localizations.comfortableMovementAssessmentMessage(
+              widget.movementType,
+              _movementAssessment,
+            ),
+      _CalibrationStep.review => localizations.calibrationSemanticReview,
+      _CalibrationStep.complete => localizations.calibrationSemanticComplete,
+    };
+  }
 }
 
 class _CurrentAngle extends StatelessWidget {
@@ -527,11 +570,17 @@ class _CurrentAngle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     final label = reading.isValid ? '~${reading.valueDegrees!.round()}°' : '—';
     return Semantics(
       label: reading.isValid
-          ? 'Current estimated ${movementType.shortLabel.toLowerCase()} angle $label'
-          : 'Current ${movementType.shortLabel.toLowerCase()} angle unavailable',
+          ? localizations.currentAngleSemantics(
+              localizations.movementLabelFor(movementType),
+              label,
+            )
+          : localizations.currentAngleUnavailableSemantics(
+              localizations.movementLabelFor(movementType),
+            ),
       child: ExcludeSemantics(
         child: Text(
           label,

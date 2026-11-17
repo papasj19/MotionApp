@@ -9,6 +9,8 @@ import 'package:camera/camera.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../test_support/localized_test_app.dart';
+
 void main() {
   testWidgets('requires an accessible movement choice before opening camera', (
     tester,
@@ -21,7 +23,7 @@ void main() {
     ]);
 
     await tester.pumpWidget(
-      MaterialApp(home: CameraScreen(cameraService: service)),
+      localizedTestApp(home: CameraScreen(cameraService: service)),
     );
     await tester.pumpAndSettle();
 
@@ -49,7 +51,7 @@ void main() {
     final tracking = _FakeHandTrackingService();
 
     await tester.pumpWidget(
-      MaterialApp(
+      localizedTestApp(
         home: CameraScreen(
           cameraService: service,
           handTrackingService: tracking,
@@ -73,6 +75,36 @@ void main() {
     expect(tracking.disposeCalls, 1);
   });
 
+  testWidgets('shows camera and movement guidance in Spanish', (tester) async {
+    final service = _FakeCameraService([
+      const CameraSetupResult(
+        status: CameraSetupStatus.noFrontCamera,
+        message: 'This service message should not be shown directly.',
+      ),
+    ]);
+
+    await tester.pumpWidget(
+      localizedTestApp(
+        locale: const Locale('es'),
+        home: CameraScreen(
+          cameraService: service,
+          handTrackingService: _FakeHandTrackingService(),
+          initialMovementType: CalibrationMovementType.headTilt,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Calibración: Cabeza'), findsOneWidget);
+    expect(find.text('Cámara frontal no disponible'), findsOneWidget);
+    expect(
+      find.text('No se encontró una cámara frontal en este dispositivo.'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('service message'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('uses the Quick Play change-movement callback when provided', (
     tester,
   ) async {
@@ -85,7 +117,7 @@ void main() {
     var changeRequests = 0;
 
     await tester.pumpWidget(
-      MaterialApp(
+      localizedTestApp(
         home: CameraScreen(
           cameraService: service,
           handTrackingService: _FakeHandTrackingService(),
@@ -107,8 +139,7 @@ void main() {
     final service = _FakeCameraService([
       const CameraSetupResult(
         status: CameraSetupStatus.permissionDenied,
-        message:
-            'Camera access was denied. Allow camera access in device '
+        message: 'Camera access was denied. Allow camera access in device '
             'settings, then try again.',
       ),
       const CameraSetupResult(
@@ -119,7 +150,7 @@ void main() {
     final tracking = _FakeHandTrackingService();
 
     await tester.pumpWidget(
-      MaterialApp(
+      localizedTestApp(
         home: CameraScreen(
           cameraService: service,
           handTrackingService: tracking,
@@ -155,7 +186,7 @@ void main() {
     final tracking = _FakeHandTrackingService();
 
     await tester.pumpWidget(
-      MaterialApp(
+      localizedTestApp(
         home: CameraScreen(
           cameraService: service,
           handTrackingService: tracking,
@@ -193,7 +224,7 @@ void main() {
     final tracking = _FakeHandTrackingService();
 
     await tester.pumpWidget(
-      MaterialApp(
+      localizedTestApp(
         home: CameraScreen(
           cameraService: service,
           handTrackingService: tracking,
@@ -228,7 +259,7 @@ void main() {
     final tracking = _FakeHandTrackingService();
 
     await tester.pumpWidget(
-      MaterialApp(
+      localizedTestApp(
         home: CameraScreen(
           cameraService: service,
           handTrackingService: tracking,
@@ -290,9 +321,8 @@ class _FakeCameraService implements CameraService {
 
   @override
   Future<CameraSetupResult> initialize() async {
-    final resultIndex = initializeCalls < results.length
-        ? initializeCalls
-        : results.length - 1;
+    final resultIndex =
+        initializeCalls < results.length ? initializeCalls : results.length - 1;
     initializeCalls += 1;
     return results[resultIndex];
   }

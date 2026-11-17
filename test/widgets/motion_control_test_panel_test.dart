@@ -1,10 +1,11 @@
 import 'package:adaptive_motion_arcade/calibration/calibration_profile.dart';
 import 'package:adaptive_motion_arcade/calibration/comfortable_movement_calibration.dart';
 import 'package:adaptive_motion_arcade/movement/movement_measurement.dart';
-import 'package:adaptive_motion_arcade/theme/arcade_theme.dart';
 import 'package:adaptive_motion_arcade/widgets/motion_control_test_panel.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+
+import '../test_support/localized_test_app.dart';
 
 void main() {
   final profile = _profile();
@@ -112,6 +113,28 @@ void main() {
     expect(find.text('15.0×'), findsOneWidget);
     expect(find.text('80 ms median'), findsOneWidget);
   });
+
+  testWidgets('uses Spanish labels and decimal formatting', (tester) async {
+    await _pumpPanel(
+      tester,
+      profile,
+      _reading(0, 20),
+      locale: const Locale('es'),
+      framesPerSecond: 24,
+      processingLatency: const Duration(milliseconds: 42),
+    );
+
+    expect(find.text('LISTO'), findsOneWidget);
+    expect(find.text('Acciones'), findsOneWidget);
+    await tester.ensureVisible(find.text('Detalles de validación'));
+    await tester.tap(find.text('Detalles de validación'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('24,0 FPS'), findsOneWidget);
+    expect(find.text('42 ms'), findsOneWidget);
+    expect(find.text('Mediana del retardo de procesamiento'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 }
 
 Future<void> _pumpPanel(
@@ -123,10 +146,11 @@ Future<void> _pumpPanel(
   Duration? processingLatency,
   int droppedFrames = 0,
   VoidCallback? onRecalibrate,
+  Locale locale = const Locale('en'),
 }) {
   return tester.pumpWidget(
-    MaterialApp(
-      theme: buildArcadeTheme(),
+    localizedTestApp(
+      locale: locale,
       home: Scaffold(
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(8),

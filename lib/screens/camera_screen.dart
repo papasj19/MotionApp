@@ -6,6 +6,8 @@ import 'package:material_ui/material_ui.dart';
 import '../calibration/calibration_profile.dart';
 import '../hand_tracking/hand_tracking_service.dart';
 import '../hand_tracking/mediapipe_hand_tracking_service.dart';
+import '../l10n/app_localizations.dart';
+import '../l10n/localization_extensions.dart';
 import '../movement/movement_measurement.dart';
 import '../movement_tracking/hand_movement_tracking_adapter.dart';
 import '../movement_tracking/mediapipe_body_movement_tracking_service.dart';
@@ -18,6 +20,17 @@ import '../widgets/motion_control_test_panel.dart';
 
 enum _CameraViewState {
   initializing,
+  ready,
+  noFrontCamera,
+  permissionDenied,
+  permissionRestricted,
+  paused,
+  failure,
+}
+
+enum _CameraMessage {
+  starting,
+  adjustingOrientation,
   ready,
   noFrontCamera,
   permissionDenied,
@@ -40,7 +53,7 @@ class CameraScreen extends StatefulWidget {
   final CameraService? cameraService;
   final HandTrackingService? handTrackingService;
   final MovementTrackingService Function(CalibrationMovementType type)?
-  trackingServiceFactory;
+      trackingServiceFactory;
   final CalibrationMovementType? initialMovementType;
   final bool enableSyntheticControllerInput;
   final VoidCallback? onChangeMovement;
@@ -63,7 +76,7 @@ class _CameraScreenState extends State<CameraScreen>
   MovementMeasurement? _movementReading;
   CalibrationProfile? _controlTestProfile;
   CameraController? _controller;
-  String _statusMessage = 'Starting the front camera…';
+  _CameraMessage _statusMessage = _CameraMessage.starting;
   bool _isAppActive = true;
   bool _isInitializing = false;
   int _requestId = 0;
@@ -125,7 +138,7 @@ class _CameraScreenState extends State<CameraScreen>
   }
 
   Future<void> _initializeCamera({
-    String startingMessage = 'Starting the front camera…',
+    _CameraMessage startingMessage = _CameraMessage.starting,
   }) async {
     if (_isInitializing || !_isAppActive) {
       return;
@@ -152,28 +165,33 @@ class _CameraScreenState extends State<CameraScreen>
     _isInitializing = false;
     CameraController? readyController;
     setState(() {
-      _statusMessage = result.message;
       switch (result.status) {
         case CameraSetupStatus.ready:
           final controller = result.controller;
           if (controller == null || !controller.value.isInitialized) {
             _viewState = _CameraViewState.failure;
-            _statusMessage = 'The camera could not start. Please try again.';
+            _statusMessage = _CameraMessage.failure;
           } else {
             _viewState = _CameraViewState.ready;
+            _statusMessage = _CameraMessage.ready;
             _controller = controller;
             readyController = controller;
           }
         case CameraSetupStatus.noFrontCamera:
           _viewState = _CameraViewState.noFrontCamera;
+          _statusMessage = _CameraMessage.noFrontCamera;
         case CameraSetupStatus.permissionDenied:
           _viewState = _CameraViewState.permissionDenied;
+          _statusMessage = _CameraMessage.permissionDenied;
         case CameraSetupStatus.permissionRestricted:
           _viewState = _CameraViewState.permissionRestricted;
+          _statusMessage = _CameraMessage.permissionRestricted;
         case CameraSetupStatus.cancelled:
           _viewState = _CameraViewState.paused;
+          _statusMessage = _CameraMessage.paused;
         case CameraSetupStatus.failure:
           _viewState = _CameraViewState.failure;
+          _statusMessage = _CameraMessage.failure;
       }
     });
 
@@ -210,7 +228,7 @@ class _CameraScreenState extends State<CameraScreen>
         _movementReading = null;
         _controlTestProfile = null;
         _viewState = _CameraViewState.initializing;
-        _statusMessage = 'Adjusting camera orientation…';
+        _statusMessage = _CameraMessage.adjustingOrientation;
       });
     }
 
@@ -219,7 +237,9 @@ class _CameraScreenState extends State<CameraScreen>
       return;
     }
 
-    await _initializeCamera(startingMessage: 'Adjusting camera orientation…');
+    await _initializeCamera(
+      startingMessage: _CameraMessage.adjustingOrientation,
+    );
   }
 
   Future<void> _pauseCamera() async {
@@ -232,7 +252,7 @@ class _CameraScreenState extends State<CameraScreen>
         _movementReading = null;
         _controlTestProfile = null;
         _viewState = _CameraViewState.paused;
-        _statusMessage = 'Camera paused while the app is not active.';
+        _statusMessage = _CameraMessage.paused;
       });
     }
     await _stopCameraAndTracking();
@@ -275,6 +295,7 @@ class _CameraScreenState extends State<CameraScreen>
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     final movementType = _selectedMovementType;
     if (movementType == null) {
       return _MovementSelectionScreen(onSelected: _selectMovement);
@@ -287,8 +308,8 @@ class _CameraScreenState extends State<CameraScreen>
     );
     final previewHeight = _viewState == _CameraViewState.ready
         ? orientation == Orientation.portrait
-              ? 340.0
-              : 220.0
+            ? 340.0
+            : 220.0
         : 180.0;
     final trackingUpdate = _trackingUpdate;
     final movementReading = _movementReading;
@@ -297,11 +318,18 @@ class _CameraScreenState extends State<CameraScreen>
       appBar: AppBar(
         title: Text(
           controlTestProfile == null
-              ? '${movementType.shortLabel} calibration'
-              : '${movementType.shortLabel} control test',
+              ? localizations.calibrationScreenTitle(
+                  localizations.movementLabelFor(movementType),
+                )
+              : localizations.controlTestScreenTitle(
+                  localizations.movementLabelFor(movementType),
+                ),
         ),
         actions: [
-          TextButton(onPressed: _changeMovement, child: const Text('Change')),
+          TextButton(
+            onPressed: _changeMovement,
+            child: Text(localizations.changeMovement),
+          ),
         ],
       ),
       body: SafeArea(
@@ -358,14 +386,14 @@ class _CameraScreenState extends State<CameraScreen>
                     else
                       _TrackingPreparationPanel(movementType: movementType),
                     const SizedBox(height: 12),
-                    const Row(
+                    Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.privacy_tip_outlined, size: 20),
-                        SizedBox(width: 8),
+                        const Icon(Icons.privacy_tip_outlined, size: 20),
+                        const SizedBox(width: 8),
                         Flexible(
                           child: Text(
-                            'Live preview only. Nothing is recorded or saved.',
+                            localizations.livePreviewPrivacy,
                             textAlign: TextAlign.center,
                           ),
                         ),
@@ -382,13 +410,12 @@ class _CameraScreenState extends State<CameraScreen>
   }
 
   bool get _canRetry => switch (_viewState) {
-    _CameraViewState.permissionDenied || _CameraViewState.failure => true,
-    _ => false,
-  };
+        _CameraViewState.permissionDenied || _CameraViewState.failure => true,
+        _ => false,
+      };
 
   void _configureTracking(CalibrationMovementType movementType) {
-    final service =
-        widget.trackingServiceFactory?.call(movementType) ??
+    final service = widget.trackingServiceFactory?.call(movementType) ??
         switch (movementType) {
           CalibrationMovementType.indexFingerBend =>
             HandMovementTrackingAdapter(
@@ -414,7 +441,7 @@ class _CameraScreenState extends State<CameraScreen>
       _selectedMovementType = movementType;
       _controlTestProfile = null;
       _viewState = _CameraViewState.initializing;
-      _statusMessage = 'Starting the front camera…';
+      _statusMessage = _CameraMessage.starting;
     });
     _configureTracking(movementType);
     unawaited(_initializeCamera());
@@ -469,25 +496,21 @@ class _MovementSelectionScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Choose a movement')),
+      appBar: AppBar(title: Text(localizations.chooseMovementTitle)),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
             Text(
-              'What comfortable movement will control the game?',
+              localizations.chooseMovementQuestion,
               style: Theme.of(
                 context,
               ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            const Text(
-              'A caregiver can choose the clearest option. Calibration measures '
-              'the child’s current comfortable movement and never asks for a '
-              'maximum range. Head control uses left/right tilt only; it does '
-              'not use blinking or facial expressions.',
-            ),
+            Text(localizations.chooseMovementHelp),
             const SizedBox(height: 16),
             for (final type in CalibrationMovementType.values) ...[
               _MovementChoiceCard(
@@ -511,6 +534,7 @@ class _MovementChoiceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     final icon = switch (movementType) {
       CalibrationMovementType.indexFingerBend => Icons.touch_app_outlined,
       CalibrationMovementType.wristBend => Icons.pan_tool_alt_outlined,
@@ -523,7 +547,10 @@ class _MovementChoiceCard extends StatelessWidget {
     };
     return Semantics(
       button: true,
-      label: '${movementType.shortLabel}. ${movementType.selectionDescription}',
+      label: localizations.optionSemantics(
+        localizations.movementLabelFor(movementType),
+        localizations.movementSelectionDescriptionFor(movementType),
+      ),
       child: Card(
         margin: EdgeInsets.zero,
         clipBehavior: Clip.antiAlias,
@@ -549,13 +576,17 @@ class _MovementChoiceCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        movementType.shortLabel,
+                        localizations.movementLabelFor(movementType),
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                              fontWeight: FontWeight.bold,
+                            ),
                       ),
                       const SizedBox(height: 4),
-                      Text(movementType.selectionDescription),
+                      Text(
+                        localizations.movementSelectionDescriptionFor(
+                          movementType,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -581,6 +612,7 @@ class _TrackingPreparationPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     return Card(
       margin: EdgeInsets.zero,
       child: Padding(
@@ -594,12 +626,12 @@ class _TrackingPreparationPanel extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Preparing movement tracking',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  Text(
+                    localizations.preparingMovementTracking,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 4),
-                  Text(movementType.positioningHint),
+                  Text(localizations.movementPositioningHintFor(movementType)),
                 ],
               ),
             ),
@@ -626,8 +658,7 @@ class _PreviewPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final activeController = controller;
-    final showPreview =
-        viewState == _CameraViewState.ready &&
+    final showPreview = viewState == _CameraViewState.ready &&
         activeController != null &&
         activeController.value.isInitialized;
 
@@ -673,27 +704,34 @@ class _MovementTrackingBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     final status = update?.status ?? MovementTrackingStatus.starting;
     final label = switch (status) {
-      MovementTrackingStatus.idle => 'Tracking paused',
-      MovementTrackingStatus.starting => 'Starting tracking…',
-      MovementTrackingStatus.searching => movementType.positioningHint,
-      MovementTrackingStatus.tracking => _trackingLabel,
-      MovementTrackingStatus.failure => 'Tracking unavailable',
+      MovementTrackingStatus.idle => localizations.trackingPaused,
+      MovementTrackingStatus.starting => localizations.startingTracking,
+      MovementTrackingStatus.searching =>
+        localizations.movementPositioningHintFor(movementType),
+      MovementTrackingStatus.tracking => _trackingLabel(localizations),
+      MovementTrackingStatus.failure => localizations.trackingUnavailable,
     };
     final icon = status == MovementTrackingStatus.tracking
         ? Icons.pan_tool_alt_outlined
         : status == MovementTrackingStatus.failure
-        ? Icons.warning_amber_rounded
-        : Icons.center_focus_weak;
+            ? Icons.warning_amber_rounded
+            : Icons.center_focus_weak;
     final semanticLabel = switch (status) {
-      MovementTrackingStatus.idle => 'Movement tracking paused.',
-      MovementTrackingStatus.starting => 'Starting movement tracking.',
-      MovementTrackingStatus.searching => movementType.positioningHint,
+      MovementTrackingStatus.idle =>
+        localizations.movementTrackingPausedSemantics,
+      MovementTrackingStatus.starting =>
+        localizations.movementTrackingStartingSemantics,
+      MovementTrackingStatus.searching =>
+        localizations.movementPositioningHintFor(movementType),
       MovementTrackingStatus.tracking =>
-        '${movementType.shortLabel} movement is being tracked.',
+        localizations.movementTrackingActiveSemantics(
+          localizations.movementLabelFor(movementType),
+        ),
       MovementTrackingStatus.failure =>
-        'Movement tracking unavailable. ${update?.message ?? ''}',
+        localizations.movementTrackingUnavailableSemantics,
     };
 
     return Semantics(
@@ -732,13 +770,20 @@ class _MovementTrackingBadge extends StatelessWidget {
     );
   }
 
-  String get _trackingLabel {
+  String _trackingLabel(AppLocalizations localizations) {
     final fps = update?.framesPerSecond.round() ?? 0;
     final latency = update?.processingLatency?.inMilliseconds;
     if (latency == null) {
-      return '${movementType.shortLabel} detected • $fps FPS';
+      return localizations.trackingDetected(
+        localizations.movementLabelFor(movementType),
+        fps,
+      );
     }
-    return '${movementType.shortLabel} detected • $fps FPS • $latency ms';
+    return localizations.trackingDetectedWithLatency(
+      localizations.movementLabelFor(movementType),
+      fps,
+      latency,
+    );
   }
 }
 
@@ -750,10 +795,11 @@ class _PreviewPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isLoading = viewState == _CameraViewState.initializing;
+    final localizations = AppLocalizations.of(context);
     return Semantics(
       label: isLoading
-          ? 'Camera preview loading'
-          : 'Camera preview unavailable',
+          ? localizations.cameraPreviewLoading
+          : localizations.cameraPreviewUnavailable,
       child: ExcludeSemantics(
         child: isLoading
             ? const CircularProgressIndicator(color: Colors.white)
@@ -775,20 +821,36 @@ class _StatusPanel extends StatelessWidget {
   });
 
   final _CameraViewState viewState;
-  final String message;
+  final _CameraMessage message;
   final Future<void> Function()? onRetry;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final localizations = AppLocalizations.of(context);
     final title = switch (viewState) {
-      _CameraViewState.initializing => 'Starting camera',
-      _CameraViewState.ready => 'Camera ready',
-      _CameraViewState.noFrontCamera => 'Front camera unavailable',
-      _CameraViewState.permissionDenied => 'Camera permission needed',
-      _CameraViewState.permissionRestricted => 'Camera access restricted',
-      _CameraViewState.paused => 'Camera paused',
-      _CameraViewState.failure => 'Camera unavailable',
+      _CameraViewState.initializing => localizations.cameraTitleStarting,
+      _CameraViewState.ready => localizations.cameraTitleReady,
+      _CameraViewState.noFrontCamera => localizations.cameraTitleNoFrontCamera,
+      _CameraViewState.permissionDenied =>
+        localizations.cameraTitlePermissionNeeded,
+      _CameraViewState.permissionRestricted =>
+        localizations.cameraTitleAccessRestricted,
+      _CameraViewState.paused => localizations.cameraTitlePaused,
+      _CameraViewState.failure => localizations.cameraTitleUnavailable,
+    };
+    final localizedMessage = switch (message) {
+      _CameraMessage.starting => localizations.cameraMessageStarting,
+      _CameraMessage.adjustingOrientation =>
+        localizations.cameraMessageAdjustingOrientation,
+      _CameraMessage.ready => localizations.cameraMessageReady,
+      _CameraMessage.noFrontCamera => localizations.cameraMessageNoFrontCamera,
+      _CameraMessage.permissionDenied =>
+        localizations.cameraMessagePermissionDenied,
+      _CameraMessage.permissionRestricted =>
+        localizations.cameraMessagePermissionRestricted,
+      _CameraMessage.paused => localizations.cameraMessagePaused,
+      _CameraMessage.failure => localizations.cameraMessageFailure,
     };
     final icon = switch (viewState) {
       _CameraViewState.ready => Icons.check_circle_outline,
@@ -813,18 +875,23 @@ class _StatusPanel extends StatelessWidget {
                   Semantics(
                     container: true,
                     liveRegion: true,
-                    label: 'Camera status. $title. $message',
+                    label: localizations.cameraStatusSemantics(
+                      title,
+                      localizedMessage,
+                    ),
                     child: ExcludeSemantics(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             title,
-                            style: Theme.of(context).textTheme.titleMedium
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
                                 ?.copyWith(fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 4),
-                          Text(message),
+                          Text(localizedMessage),
                         ],
                       ),
                     ),
@@ -834,7 +901,7 @@ class _StatusPanel extends StatelessWidget {
                     FilledButton.tonalIcon(
                       onPressed: onRetry,
                       icon: const Icon(Icons.refresh),
-                      label: const Text('Try again'),
+                      label: Text(localizations.tryAgain),
                     ),
                   ],
                 ],

@@ -4,6 +4,8 @@ import '../calibration/calibration_profile.dart';
 import '../calibration/comfortable_movement_calibration.dart';
 import '../input_controller/calibrated_motion_controller.dart';
 import '../input_controller/motion_input_controller.dart';
+import '../l10n/app_localizations.dart';
+import '../l10n/localization_extensions.dart';
 import '../movement/movement_measurement.dart';
 import '../theme/arcade_theme.dart';
 
@@ -134,38 +136,48 @@ class _MotionControlTestPanelState extends State<MotionControlTestPanel> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     final trackingLost = _controller.trackingState == MotionTrackingState.lost;
     final pressed = _controller.actionState == MotionActionState.pressed;
     final armed = _controller.isArmed;
     final (status, instruction, accent) = trackingLost
         ? (
-            'TRACKING PAUSED',
-            'Reposition the ${widget.profile.movementType.trackingSubject} to continue.',
+            localizations.controlStatusTrackingPaused,
+            localizations.controlInstructionReposition(
+              localizations.movementTrackingSubjectFor(
+                widget.profile.movementType,
+              ),
+            ),
             ArcadeColors.softPink,
           )
         : pressed
-        ? (
-            'ACTION PRESSED',
-            'Return comfortably to rest before moving again.',
-            ArcadeColors.arcadeYellow,
-          )
-        : !armed
-        ? (
-            'RETURN TO REST',
-            'The control will arm after the movement returns to rest.',
-            ArcadeColors.lavender,
-          )
-        : (
-            'READY',
-            'Make one comfortable ${widget.profile.movementType.shortLabel.toLowerCase()} movement.',
-            ArcadeColors.electricCyan,
-          );
+            ? (
+                localizations.controlStatusActionPressed,
+                localizations.controlInstructionReturnComfortably,
+                ArcadeColors.arcadeYellow,
+              )
+            : !armed
+                ? (
+                    localizations.controlStatusReturnToRest,
+                    localizations.controlInstructionWillArm,
+                    ArcadeColors.lavender,
+                  )
+                : (
+                    localizations.controlStatusReady,
+                    localizations.movementReadyInstructionFor(
+                      widget.profile.movementType,
+                    ),
+                    ArcadeColors.electricCyan,
+                  );
 
     return Semantics(
       container: true,
       liveRegion: true,
-      label:
-          'Control test. $status. Actions detected $_actionCount. $instruction',
+      label: localizations.controlTestSemantics(
+        status,
+        _actionCount,
+        instruction,
+      ),
       child: Card(
         margin: EdgeInsets.zero,
         child: Padding(
@@ -174,13 +186,13 @@ class _MotionControlTestPanelState extends State<MotionControlTestPanel> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Control Test',
+                localizations.controlTestTitle,
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
               const SizedBox(height: 6),
-              const Text('One comfortable movement should create one action.'),
+              Text(localizations.controlTestDescription),
               const SizedBox(height: 20),
               LayoutBuilder(
                 builder: (context, constraints) {
@@ -217,9 +229,9 @@ class _MotionControlTestPanelState extends State<MotionControlTestPanel> {
                 const SizedBox(height: 20),
                 const Divider(),
                 const SizedBox(height: 8),
-                const Text(
-                  'Developer test input',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                Text(
+                  localizations.developerTestInput,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 Wrap(
@@ -230,12 +242,12 @@ class _MotionControlTestPanelState extends State<MotionControlTestPanel> {
                       onPressed: () =>
                           _injectSignal(_controller.activationThreshold + 1),
                       icon: const Icon(Icons.arrow_upward),
-                      label: const Text('Test press'),
+                      label: Text(localizations.testPress),
                     ),
                     OutlinedButton.icon(
                       onPressed: () => _injectSignal(0),
                       icon: const Icon(Icons.arrow_downward),
-                      label: const Text('Test release'),
+                      label: Text(localizations.testRelease),
                     ),
                   ],
                 ),
@@ -244,11 +256,11 @@ class _MotionControlTestPanelState extends State<MotionControlTestPanel> {
               ExpansionTile(
                 tilePadding: EdgeInsets.zero,
                 childrenPadding: const EdgeInsets.only(bottom: 8),
-                title: const Text(
-                  'Validation details',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                title: Text(
+                  localizations.validationDetails,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
-                subtitle: const Text('Caregiver engineering checks'),
+                subtitle: Text(localizations.caregiverEngineeringChecks),
                 children: [
                   _ValidationDetails(
                     validReadingCount: _validReadingCount,
@@ -265,7 +277,7 @@ class _MotionControlTestPanelState extends State<MotionControlTestPanel> {
               OutlinedButton.icon(
                 onPressed: widget.onRecalibrate,
                 icon: const Icon(Icons.restart_alt),
-                label: const Text('Recalibrate'),
+                label: Text(localizations.recalibrate),
               ),
             ],
           ),
@@ -330,9 +342,9 @@ class _ControlTarget extends StatelessWidget {
           status,
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            color: pressed ? ArcadeColors.background : accent,
-            fontWeight: FontWeight.w900,
-          ),
+                color: pressed ? ArcadeColors.background : accent,
+                fontWeight: FontWeight.w900,
+              ),
         ),
       ),
     );
@@ -360,9 +372,12 @@ class _ControlDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     final measurement = signal == null
-        ? 'Unavailable'
-        : '${signal!.toStringAsFixed(1)}° toward action';
+        ? localizations.unavailable
+        : localizations.movementTowardAction(
+            localizations.formatNumber(signal!),
+          );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -373,19 +388,30 @@ class _ControlDetails extends StatelessWidget {
           ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
-        _DetailRow(label: 'Tracking', value: trackingLost ? 'Lost' : 'Ready'),
-        _DetailRow(label: 'Movement', value: measurement),
         _DetailRow(
-          label: 'Press threshold',
-          value: '${activationThreshold.toStringAsFixed(1)}°',
+          label: localizations.trackingLabel,
+          value: trackingLost
+              ? localizations.trackingLost
+              : localizations.trackingReady,
+        ),
+        _DetailRow(label: localizations.movementLabel, value: measurement),
+        _DetailRow(
+          label: localizations.pressThreshold,
+          value: '${localizations.formatNumber(activationThreshold)}°',
         ),
         _DetailRow(
-          label: 'Release threshold',
-          value: '${releaseThreshold.toStringAsFixed(1)}°',
+          label: localizations.releaseThreshold,
+          value: '${localizations.formatNumber(releaseThreshold)}°',
         ),
-        _DetailRow(label: 'Actions', value: '$actionCount'),
+        _DetailRow(
+          label: localizations.actionsLabel,
+          value: '$actionCount',
+        ),
         if (lastEvent != null)
-          _DetailRow(label: 'Last event', value: lastEvent!.name),
+          _DetailRow(
+            label: localizations.lastEvent,
+            value: localizations.motionEventLabelFor(lastEvent!),
+          ),
       ],
     );
   }
@@ -440,6 +466,7 @@ class _ValidationDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     final validPercent = readingCount == 0
         ? 0
         : (validReadingCount * 100 / readingCount).round();
@@ -448,43 +475,52 @@ class _ValidationDetails extends StatelessWidget {
     final ratio = signalToNoiseRatio;
     return Semantics(
       container: true,
-      label: 'Caregiver validation details.',
+      label: localizations.caregiverValidationSemantics,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _DetailRow(
-            label: 'Valid tracking samples',
-            value: '$validReadingCount/$readingCount ($validPercent%)',
+            label: localizations.validTrackingSamples,
+            value: localizations.validTrackingSamplesValue(
+              validReadingCount,
+              readingCount,
+              validPercent,
+            ),
           ),
           _DetailRow(
-            label: 'Detection rate',
-            value: '${framesPerSecond.toStringAsFixed(1)} FPS',
+            label: localizations.detectionRate,
+            value: localizations.framesPerSecondValue(
+              localizations.formatNumber(framesPerSecond),
+            ),
           ),
           _DetailRow(
-            label: 'Processing delay median',
+            label: localizations.processingDelayMedian,
             value: latency == null
-                ? 'Not available'
-                : '${latency.inMilliseconds} ms',
+                ? localizations.notAvailable
+                : localizations.millisecondsValue(latency.inMilliseconds),
           ),
-          _DetailRow(label: 'Dropped frames', value: '$droppedFrames'),
           _DetailRow(
-            label: 'Observed signal/noise',
+            label: localizations.droppedFrames,
+            value: '$droppedFrames',
+          ),
+          _DetailRow(
+            label: localizations.observedSignalNoise,
             value: ratio == null
-                ? 'Not available'
-                : '${ratio.toStringAsFixed(1)}×',
+                ? localizations.notAvailable
+                : localizations.ratioValue(
+                    localizations.formatNumber(ratio),
+                  ),
           ),
           _DetailRow(
-            label: 'Signal rise to action',
+            label: localizations.signalRiseToAction,
             value: actionTime == null
-                ? 'Complete an action'
-                : '${actionTime.inMilliseconds} ms median',
+                ? localizations.completeAnAction
+                : localizations.millisecondsMedianValue(
+                    actionTime.inMilliseconds,
+                  ),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'These are engineering diagnostics, not clinical measurements. '
-            'Signal timing starts when the camera estimate rises above the '
-            'measured noise floor; it is not a measurement of physical reaction time.',
-          ),
+          Text(localizations.engineeringDiagnosticsNote),
         ],
       ),
     );
