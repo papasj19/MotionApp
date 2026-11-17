@@ -330,5 +330,31 @@
   "signalGeometryUsable": "Signal geometry: usable",
   "signalGeometrySettling": "Signal geometry: settling",
   "signalGeometryUnavailable": "Signal geometry: unavailable",
+  "firstGameSectionLabel": "FIRST GAME PREVIEW",
+  "firstGameTitle": "Sky Sprint",
+  "firstGameDescription": "Use one action to help Joybit fly. This preview uses the large button or keyboard; calibrated movement connects in a later checkpoint.",
+  "openGamePreview": "Open game preview",
+  "gameTitle": "Sky Sprint",
+  "gamePreviewLabel": "INPUT PREVIEW",
+  "gameInputInstructions": "Use the large button. On a computer, Space or Enter also works.",
+  "gamePrimaryAction": "FLY",
+  "gamePrimaryActionSemantics": "Make Joybit fly",
+  "gameActionCount": "{count, plural, =0{Actions: 0} =1{Action: 1} other{Actions: {count}}}",
+  "@gameActionCount": {
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "gameStatusSemantics": "Sky Sprint input preview. {status}. {count, plural, =0{No actions received} =1{One action received} other{{count} actions received}}.",
+  "@gameStatusSemantics": {
+    "placeholders": {
+      "status": {"type": "String"},
+      "count": {"type": "int"}
+    }
+  },
+  "gameReady": "Ready",
+  "gamePaused": "Paused",
+  "gamePauseTooltip": "Pause game",
+  "gameResumeTooltip": "Resume game",
+  "gameRestartTooltip": "Restart game preview",
+  "gameExitTooltip": "Return to Quick Play",
   "joybitDescription": "Joybit, a friendly lavender hedgehog wearing arcade headphones."
 }

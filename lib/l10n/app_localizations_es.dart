@@ -746,6 +746,77 @@ class AppLocalizationsEs extends AppLocalizations {
   String get signalGeometryUnavailable => 'Geometría de señal: no disponible';
 
   @override
+  String get firstGameSectionLabel => 'VISTA PREVIA DEL PRIMER JUEGO';
+
+  @override
+  String get firstGameTitle => 'Carrera Celeste';
+
+  @override
+  String get firstGameDescription =>
+      'Usa una acción para ayudar a Joybit a volar. Esta vista previa utiliza el botón grande o el teclado; el movimiento calibrado se conectará en una fase posterior.';
+
+  @override
+  String get openGamePreview => 'Abrir la vista previa';
+
+  @override
+  String get gameTitle => 'Carrera Celeste';
+
+  @override
+  String get gamePreviewLabel => 'PRUEBA DE ENTRADA';
+
+  @override
+  String get gameInputInstructions =>
+      'Usa el botón grande. En un ordenador también puedes usar Espacio o Intro.';
+
+  @override
+  String get gamePrimaryAction => 'VOLAR';
+
+  @override
+  String get gamePrimaryActionSemantics => 'Hacer que Joybit vuele';
+
+  @override
+  String gameActionCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Acciones: $count',
+      one: 'Acción: 1',
+      zero: 'Acciones: 0',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String gameStatusSemantics(String status, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Se han recibido $count acciones',
+      one: 'Se ha recibido una acción',
+      zero: 'No se ha recibido ninguna acción',
+    );
+    return 'Vista previa de Carrera Celeste. $status. $_temp0.';
+  }
+
+  @override
+  String get gameReady => 'Listo';
+
+  @override
+  String get gamePaused => 'En pausa';
+
+  @override
+  String get gamePauseTooltip => 'Pausar el juego';
+
+  @override
+  String get gameResumeTooltip => 'Reanudar el juego';
+
+  @override
+  String get gameRestartTooltip => 'Reiniciar la vista previa';
+
+  @override
+  String get gameExitTooltip => 'Volver a Juego rápido';
+
+  @override
   String get joybitDescription =>
       'Joybit, un simpático erizo lavanda con auriculares de arcade.';
 }

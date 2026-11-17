@@ -1155,6 +1155,108 @@ abstract class AppLocalizations {
   /// **'Signal geometry: unavailable'**
   String get signalGeometryUnavailable;
 
+  /// No description provided for @firstGameSectionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'FIRST GAME PREVIEW'**
+  String get firstGameSectionLabel;
+
+  /// No description provided for @firstGameTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sky Sprint'**
+  String get firstGameTitle;
+
+  /// No description provided for @firstGameDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Use one action to help Joybit fly. This preview uses the large button or keyboard; calibrated movement connects in a later checkpoint.'**
+  String get firstGameDescription;
+
+  /// No description provided for @openGamePreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Open game preview'**
+  String get openGamePreview;
+
+  /// No description provided for @gameTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sky Sprint'**
+  String get gameTitle;
+
+  /// No description provided for @gamePreviewLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'INPUT PREVIEW'**
+  String get gamePreviewLabel;
+
+  /// No description provided for @gameInputInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the large button. On a computer, Space or Enter also works.'**
+  String get gameInputInstructions;
+
+  /// No description provided for @gamePrimaryAction.
+  ///
+  /// In en, this message translates to:
+  /// **'FLY'**
+  String get gamePrimaryAction;
+
+  /// No description provided for @gamePrimaryActionSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Make Joybit fly'**
+  String get gamePrimaryActionSemantics;
+
+  /// No description provided for @gameActionCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Actions: 0} =1{Action: 1} other{Actions: {count}}}'**
+  String gameActionCount(int count);
+
+  /// No description provided for @gameStatusSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Sky Sprint input preview. {status}. {count, plural, =0{No actions received} =1{One action received} other{{count} actions received}}.'**
+  String gameStatusSemantics(String status, int count);
+
+  /// No description provided for @gameReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready'**
+  String get gameReady;
+
+  /// No description provided for @gamePaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused'**
+  String get gamePaused;
+
+  /// No description provided for @gamePauseTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause game'**
+  String get gamePauseTooltip;
+
+  /// No description provided for @gameResumeTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume game'**
+  String get gameResumeTooltip;
+
+  /// No description provided for @gameRestartTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Restart game preview'**
+  String get gameRestartTooltip;
+
+  /// No description provided for @gameExitTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Return to Quick Play'**
+  String get gameExitTooltip;
+
   /// No description provided for @joybitDescription.
   ///
   /// In en, this message translates to:

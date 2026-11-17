@@ -17,7 +17,8 @@ protocol and synthetic acceptance scenarios. One adult tester reported a pass
 of the minimum core checklist on a physical Android device at commit `2da9fae`
 on 2026-11-17. Quantitative diagnostics, the broader device/condition matrix
 and iPhone/iPad observations remain pending. Calibration remains in memory;
-games, student profiles, session persistence and results are not implemented.
+full game mechanics, student profiles, session persistence and results are not
+implemented.
 
 ## Architecture
 
@@ -167,6 +168,20 @@ available in both languages. Motion and calibration logic continue to expose
 semantic states so internal diagnostic sentences do not leak into the
 interface. New screens must add matching entries to both ARB catalogs and test
 both locales before they are considered complete.
+
+## Stage 9A game foundation
+
+The Quick Play screen includes a bilingual preview of the first original game,
+**Sky Sprint**. Its Flame shell renders an original pixel-style Joybit flyer and
+accepts the same primary arcade action from a large touch button or the Space
+and Enter keys. Pause, resume, restart and exit are available without requiring
+a camera, so the game boundary can be tested independently.
+
+`ArcadeInputController` is the camera-free contract used by the game. The
+`MotionArcadeInputAdapter` forwards only Stage 6 one-shot primary events;
+action-down, action-up and tracking-state events cannot create duplicate game
+actions. Stage 9A does not connect live calibrated movement to the preview and
+does not yet include gravity, obstacles, collision, scores or saved sessions.
 
 ## Hand-tracking technology decision
 

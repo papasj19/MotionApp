@@ -5,11 +5,17 @@ import '../movement/movement_measurement.dart';
 import '../theme/arcade_theme.dart';
 import '../widgets/joybit_companion.dart';
 import 'camera_screen.dart';
+import 'flap_to_fly_screen.dart';
 
 class QuickPlayScreen extends StatelessWidget {
-  const QuickPlayScreen({super.key, this.cameraScreenBuilder});
+  const QuickPlayScreen({
+    super.key,
+    this.cameraScreenBuilder,
+    this.gamePreviewScreenBuilder,
+  });
 
   final WidgetBuilder? cameraScreenBuilder;
+  final WidgetBuilder? gamePreviewScreenBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +46,10 @@ class QuickPlayScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 18),
                   const _ComfortNote(),
+                  const SizedBox(height: 18),
+                  _GamePreviewCard(
+                    onOpen: () => _openGamePreview(context),
+                  ),
                 ],
               ),
             ),
@@ -65,6 +75,16 @@ class QuickPlayScreen extends StatelessWidget {
             onChangeMovement: () => Navigator.of(routeContext).pop(),
           );
         },
+      ),
+    );
+  }
+
+  void _openGamePreview(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (routeContext) =>
+            gamePreviewScreenBuilder?.call(routeContext) ??
+            const FlapToFlyScreen(),
       ),
     );
   }
@@ -326,6 +346,88 @@ class _ComfortNote extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _GamePreviewCard extends StatelessWidget {
+  const _GamePreviewCard({required this.onOpen});
+
+  final VoidCallback onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
+    final copy = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          localizations.firstGameSectionLabel,
+          style: const TextStyle(
+            color: ArcadeColors.arcadeYellow,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 0.8,
+          ),
+        ),
+        const SizedBox(height: 5),
+        Text(
+          localizations.firstGameTitle,
+          style: Theme.of(
+            context,
+          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900),
+        ),
+        const SizedBox(height: 6),
+        Text(localizations.firstGameDescription),
+      ],
+    );
+    final button = FilledButton.icon(
+      key: const Key('open-game-preview'),
+      onPressed: onOpen,
+      icon: const Icon(Icons.rocket_launch_rounded),
+      label: Text(localizations.openGamePreview),
+    );
+
+    return Semantics(
+      key: const Key('first-game-preview-card'),
+      container: true,
+      label: localizations.optionSemantics(
+        localizations.firstGameTitle,
+        localizations.firstGameDescription,
+      ),
+      child: Card(
+        margin: EdgeInsets.zero,
+        child: Padding(
+          padding: const EdgeInsets.all(18),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              if (constraints.maxWidth >= 660) {
+                return Row(
+                  children: [
+                    const Icon(
+                      Icons.flight_rounded,
+                      color: ArcadeColors.electricCyan,
+                      size: 56,
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(child: copy),
+                    const SizedBox(width: 18),
+                    button,
+                  ],
+                );
+              }
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  copy,
+                  const SizedBox(height: 14),
+                  button,
+                ],
+              );
+            },
+          ),
+        ),
       ),
     );
   }

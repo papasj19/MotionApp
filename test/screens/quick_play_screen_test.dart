@@ -49,6 +49,25 @@ void main() {
     expect(find.text('Calibration route'), findsOneWidget);
   });
 
+  testWidgets('opens the first game preview without camera setup', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      localizedTestApp(
+        home: QuickPlayScreen(
+          gamePreviewScreenBuilder: (_) =>
+              const Scaffold(body: Text('Injected game preview')),
+        ),
+      ),
+    );
+
+    await tester.ensureVisible(find.byKey(const Key('open-game-preview')));
+    await tester.tap(find.byKey(const Key('open-game-preview')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Injected game preview'), findsOneWidget);
+  });
+
   testWidgets('movement tiles reflow on a narrow portrait phone', (
     tester,
   ) async {

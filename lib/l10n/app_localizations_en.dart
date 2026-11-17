@@ -732,6 +732,77 @@ class AppLocalizationsEn extends AppLocalizations {
   String get signalGeometryUnavailable => 'Signal geometry: unavailable';
 
   @override
+  String get firstGameSectionLabel => 'FIRST GAME PREVIEW';
+
+  @override
+  String get firstGameTitle => 'Sky Sprint';
+
+  @override
+  String get firstGameDescription =>
+      'Use one action to help Joybit fly. This preview uses the large button or keyboard; calibrated movement connects in a later checkpoint.';
+
+  @override
+  String get openGamePreview => 'Open game preview';
+
+  @override
+  String get gameTitle => 'Sky Sprint';
+
+  @override
+  String get gamePreviewLabel => 'INPUT PREVIEW';
+
+  @override
+  String get gameInputInstructions =>
+      'Use the large button. On a computer, Space or Enter also works.';
+
+  @override
+  String get gamePrimaryAction => 'FLY';
+
+  @override
+  String get gamePrimaryActionSemantics => 'Make Joybit fly';
+
+  @override
+  String gameActionCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Actions: $count',
+      one: 'Action: 1',
+      zero: 'Actions: 0',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String gameStatusSemantics(String status, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count actions received',
+      one: 'One action received',
+      zero: 'No actions received',
+    );
+    return 'Sky Sprint input preview. $status. $_temp0.';
+  }
+
+  @override
+  String get gameReady => 'Ready';
+
+  @override
+  String get gamePaused => 'Paused';
+
+  @override
+  String get gamePauseTooltip => 'Pause game';
+
+  @override
+  String get gameResumeTooltip => 'Resume game';
+
+  @override
+  String get gameRestartTooltip => 'Restart game preview';
+
+  @override
+  String get gameExitTooltip => 'Return to Quick Play';
+
+  @override
   String get joybitDescription =>
       'Joybit, a friendly lavender hedgehog wearing arcade headphones.';
 }
