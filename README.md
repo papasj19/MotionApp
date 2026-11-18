@@ -190,10 +190,16 @@ data and is not presented as motor improvement. Sessions are not persisted yet.
 
 After Control Test, the calibrated input now opens a responsive game-selection
 screen based on the cartridge-style wireframe. Sky Sprint is playable and
-returns to that screen when closed. A disabled Music Maker cartridge reserves
-the second slot without pretending that its instrument interaction has already
-been designed or implemented. The same selection screen is available from
-Quick Play for camera-free button and keyboard testing.
+returns to that screen when closed. Music Maker is a second, noncompetitive
+one-action game: each accepted action advances an original four-note trumpet
+phrase with matching visual feedback. It has no timer, obstacles, score or
+failure state. Both games are available from Quick Play for camera-free button
+and keyboard testing, or through the same calibrated movement controller.
+
+Music Maker's synthesized note assets are bundled with the app and played
+locally. It does not record sound or request microphone access. If playback is
+unavailable, its visual note feedback continues so a platform audio problem
+does not block play.
 
 Game difficulty and physical control sensitivity must remain independent.
 `FlapToFlyConfig` already isolates game-only values such as gravity, obstacle
@@ -222,7 +228,8 @@ dart run mediapipe_core:bundle_models --check
 
 - Camera images are processed on the device and are not recorded, saved or
   uploaded by this app.
-- Audio is disabled and the app does not request microphone permission.
+- Music Maker plays bundled audio locally; the app does not record sound or
+  request microphone permission.
 - The bundled model needs no network connection at runtime.
 - Hand landmarks are estimates and must not be presented as millimeter-accurate
   or clinical measurements.

@@ -752,7 +752,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get gameSelectionCardDescription =>
-      'Open the game cabinet. Sky Sprint is ready, and a new music game is coming next.';
+      'Open the game cabinet. Sky Sprint and Music Maker are ready.';
 
   @override
   String get gameSelectionKeyboardDescription =>
@@ -778,13 +778,92 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get musicGameDescription =>
-      'Use one comfortable movement to play an instrument. We will choose and build the instrument in the next stage.';
+      'Play Joybit\'s four-note trumpet with one comfortable movement.';
 
   @override
   String get comingNext => 'COMING NEXT';
 
   @override
   String get donePlaying => 'Done playing';
+
+  @override
+  String get musicGameHeading => 'Play Joybit\'s trumpet';
+
+  @override
+  String get musicGameKeyboardInstruction =>
+      'Press PLAY A NOTE. On a computer, Space or Enter also works.';
+
+  @override
+  String get musicGameMotionInstruction =>
+      'Make one comfortable movement for each note, returning to rest between notes.';
+
+  @override
+  String get musicGameReady => 'Ready for your first note';
+
+  @override
+  String musicGameNotePlayed(String note) {
+    return '$note!';
+  }
+
+  @override
+  String musicGameNotesPlayed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Notes played: $count',
+      one: 'Note played: 1',
+      zero: 'Notes played: 0',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get musicGameAction => 'PLAY A NOTE';
+
+  @override
+  String get musicGameActionSemantics => 'Play the next trumpet note';
+
+  @override
+  String musicGameStatusSemantics(
+    String announcement,
+    int count,
+    String instruction,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count notes played',
+      one: 'One note played',
+      zero: 'No notes played',
+    );
+    return 'Music Maker. $announcement. $_temp0. $instruction';
+  }
+
+  @override
+  String get musicGameMotionReadyInstruction =>
+      'Make your comfortable movement to play the next note.';
+
+  @override
+  String get musicGameResetTooltip => 'Start the song again';
+
+  @override
+  String get musicGameSoundUnavailableTitle => 'Sound unavailable';
+
+  @override
+  String get musicGameSoundUnavailableDescription =>
+      'The visual notes still work. Check the device volume and try again later.';
+
+  @override
+  String get musicNoteDo => 'DO';
+
+  @override
+  String get musicNoteRe => 'RE';
+
+  @override
+  String get musicNoteMi => 'MI';
+
+  @override
+  String get musicNoteSol => 'SOL';
 
   @override
   String get gameTitle => 'Sky Sprint';

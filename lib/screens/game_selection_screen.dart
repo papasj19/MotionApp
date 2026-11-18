@@ -5,18 +5,21 @@ import '../game/input/arcade_input.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/arcade_theme.dart';
 import 'flap_to_fly_screen.dart';
+import 'music_maker_screen.dart';
 
 class GameSelectionScreen extends StatelessWidget {
   const GameSelectionScreen({
     this.inputController,
     this.motionInputStatus,
     this.skySprintBuilder,
+    this.musicMakerBuilder,
     super.key,
   });
 
   final ArcadeInputController? inputController;
   final ValueListenable<ArcadeMotionInputStatus>? motionInputStatus;
   final WidgetBuilder? skySprintBuilder;
+  final WidgetBuilder? musicMakerBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -65,6 +68,7 @@ class GameSelectionScreen extends StatelessWidget {
                     const SizedBox(height: 22),
                     _GameCartridgeGrid(
                       onPlaySkySprint: () => _openSkySprint(context),
+                      onPlayMusicMaker: () => _openMusicMaker(context),
                     ),
                     const SizedBox(height: 24),
                     OutlinedButton.icon(
@@ -102,12 +106,29 @@ class GameSelectionScreen extends StatelessWidget {
       ),
     );
   }
+
+  void _openMusicMaker(BuildContext context) {
+    Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (routeContext) =>
+            musicMakerBuilder?.call(routeContext) ??
+            MusicMakerScreen(
+              inputController: inputController,
+              motionInputStatus: motionInputStatus,
+            ),
+      ),
+    );
+  }
 }
 
 class _GameCartridgeGrid extends StatelessWidget {
-  const _GameCartridgeGrid({required this.onPlaySkySprint});
+  const _GameCartridgeGrid({
+    required this.onPlaySkySprint,
+    required this.onPlayMusicMaker,
+  });
 
   final VoidCallback onPlaySkySprint;
+  final VoidCallback onPlayMusicMaker;
 
   @override
   Widget build(BuildContext context) {
@@ -142,7 +163,8 @@ class _GameCartridgeGrid extends StatelessWidget {
                 description: AppLocalizations.of(context).musicGameDescription,
                 icon: Icons.music_note_rounded,
                 accent: ArcadeColors.softPink,
-                actionLabel: AppLocalizations.of(context).comingNext,
+                actionLabel: AppLocalizations.of(context).playSelectedGame,
+                onPressed: onPlayMusicMaker,
               ),
             ),
           ],

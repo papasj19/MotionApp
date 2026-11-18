@@ -766,7 +766,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get gameSelectionCardDescription =>
-      'Abre la colección de juegos. Carrera Celeste está lista y el próximo será un nuevo juego musical.';
+      'Abre la colección de juegos. Carrera Celeste y Creador musical están listos.';
 
   @override
   String get gameSelectionKeyboardDescription =>
@@ -792,13 +792,93 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get musicGameDescription =>
-      'Usa un movimiento cómodo para tocar un instrumento. Elegiremos y construiremos el instrumento en la próxima fase.';
+      'Toca la trompeta de cuatro notas de Joybit con un movimiento cómodo.';
 
   @override
   String get comingNext => 'PRÓXIMO JUEGO';
 
   @override
   String get donePlaying => 'Terminar de jugar';
+
+  @override
+  String get musicGameHeading => 'Toca la trompeta de Joybit';
+
+  @override
+  String get musicGameKeyboardInstruction =>
+      'Pulsa TOCAR UNA NOTA. En un ordenador también puedes usar Espacio o Intro.';
+
+  @override
+  String get musicGameMotionInstruction =>
+      'Haz un movimiento cómodo para cada nota y vuelve al reposo entre las notas.';
+
+  @override
+  String get musicGameReady => 'Todo listo para tu primera nota';
+
+  @override
+  String musicGameNotePlayed(String note) {
+    return '¡$note!';
+  }
+
+  @override
+  String musicGameNotesPlayed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Notas tocadas: $count',
+      one: 'Nota tocada: 1',
+      zero: 'Notas tocadas: 0',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get musicGameAction => 'TOCAR UNA NOTA';
+
+  @override
+  String get musicGameActionSemantics =>
+      'Tocar la siguiente nota de la trompeta';
+
+  @override
+  String musicGameStatusSemantics(
+    String announcement,
+    int count,
+    String instruction,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Se han tocado $count notas',
+      one: 'Se ha tocado una nota',
+      zero: 'No se ha tocado ninguna nota',
+    );
+    return 'Creador musical. $announcement. $_temp0. $instruction';
+  }
+
+  @override
+  String get musicGameMotionReadyInstruction =>
+      'Haz tu movimiento cómodo para tocar la siguiente nota.';
+
+  @override
+  String get musicGameResetTooltip => 'Empezar de nuevo la canción';
+
+  @override
+  String get musicGameSoundUnavailableTitle => 'Sonido no disponible';
+
+  @override
+  String get musicGameSoundUnavailableDescription =>
+      'Las notas visuales siguen funcionando. Comprueba el volumen del dispositivo y vuelve a intentarlo más tarde.';
+
+  @override
+  String get musicNoteDo => 'DO';
+
+  @override
+  String get musicNoteRe => 'RE';
+
+  @override
+  String get musicNoteMi => 'MI';
+
+  @override
+  String get musicNoteSol => 'SOL';
 
   @override
   String get gameTitle => 'Carrera Celeste';

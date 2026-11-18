@@ -1194,7 +1194,7 @@ abstract class AppLocalizations {
   /// No description provided for @gameSelectionCardDescription.
   ///
   /// In en, this message translates to:
-  /// **'Open the game cabinet. Sky Sprint is ready, and a new music game is coming next.'**
+  /// **'Open the game cabinet. Sky Sprint and Music Maker are ready.'**
   String get gameSelectionCardDescription;
 
   /// No description provided for @gameSelectionKeyboardDescription.
@@ -1236,7 +1236,7 @@ abstract class AppLocalizations {
   /// No description provided for @musicGameDescription.
   ///
   /// In en, this message translates to:
-  /// **'Use one comfortable movement to play an instrument. We will choose and build the instrument in the next stage.'**
+  /// **'Play Joybit\'s four-note trumpet with one comfortable movement.'**
   String get musicGameDescription;
 
   /// No description provided for @comingNext.
@@ -1250,6 +1250,112 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Done playing'**
   String get donePlaying;
+
+  /// No description provided for @musicGameHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Play Joybit\'s trumpet'**
+  String get musicGameHeading;
+
+  /// No description provided for @musicGameKeyboardInstruction.
+  ///
+  /// In en, this message translates to:
+  /// **'Press PLAY A NOTE. On a computer, Space or Enter also works.'**
+  String get musicGameKeyboardInstruction;
+
+  /// No description provided for @musicGameMotionInstruction.
+  ///
+  /// In en, this message translates to:
+  /// **'Make one comfortable movement for each note, returning to rest between notes.'**
+  String get musicGameMotionInstruction;
+
+  /// No description provided for @musicGameReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready for your first note'**
+  String get musicGameReady;
+
+  /// No description provided for @musicGameNotePlayed.
+  ///
+  /// In en, this message translates to:
+  /// **'{note}!'**
+  String musicGameNotePlayed(String note);
+
+  /// No description provided for @musicGameNotesPlayed.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Notes played: 0} =1{Note played: 1} other{Notes played: {count}}}'**
+  String musicGameNotesPlayed(int count);
+
+  /// No description provided for @musicGameAction.
+  ///
+  /// In en, this message translates to:
+  /// **'PLAY A NOTE'**
+  String get musicGameAction;
+
+  /// No description provided for @musicGameActionSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Play the next trumpet note'**
+  String get musicGameActionSemantics;
+
+  /// No description provided for @musicGameStatusSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Music Maker. {announcement}. {count, plural, =0{No notes played} =1{One note played} other{{count} notes played}}. {instruction}'**
+  String musicGameStatusSemantics(
+    String announcement,
+    int count,
+    String instruction,
+  );
+
+  /// No description provided for @musicGameMotionReadyInstruction.
+  ///
+  /// In en, this message translates to:
+  /// **'Make your comfortable movement to play the next note.'**
+  String get musicGameMotionReadyInstruction;
+
+  /// No description provided for @musicGameResetTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Start the song again'**
+  String get musicGameResetTooltip;
+
+  /// No description provided for @musicGameSoundUnavailableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sound unavailable'**
+  String get musicGameSoundUnavailableTitle;
+
+  /// No description provided for @musicGameSoundUnavailableDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'The visual notes still work. Check the device volume and try again later.'**
+  String get musicGameSoundUnavailableDescription;
+
+  /// No description provided for @musicNoteDo.
+  ///
+  /// In en, this message translates to:
+  /// **'DO'**
+  String get musicNoteDo;
+
+  /// No description provided for @musicNoteRe.
+  ///
+  /// In en, this message translates to:
+  /// **'RE'**
+  String get musicNoteRe;
+
+  /// No description provided for @musicNoteMi.
+  ///
+  /// In en, this message translates to:
+  /// **'MI'**
+  String get musicNoteMi;
+
+  /// No description provided for @musicNoteSol.
+  ///
+  /// In en, this message translates to:
+  /// **'SOL'**
+  String get musicNoteSol;
 
   /// No description provided for @gameTitle.
   ///

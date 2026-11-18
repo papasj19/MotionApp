@@ -336,16 +336,46 @@
   "openGamePreview": "Choose a game",
   "gameSelectionTitle": "Choose a game",
   "gameSelectionHeading": "Pick your next game",
-  "gameSelectionCardDescription": "Open the game cabinet. Sky Sprint is ready, and a new music game is coming next.",
+  "gameSelectionCardDescription": "Open the game cabinet. Sky Sprint and Music Maker are ready.",
   "gameSelectionKeyboardDescription": "Try a game with the large button. On a computer, Space or Enter also works.",
   "gameSelectionMotionDescription": "Your calibrated movement works with every available game.",
   "gameSelectionMotionReadyInstruction": "Your calibrated movement is ready for the selected game.",
   "skySprintGameDescription": "Help Joybit fly through the gates in this first arcade challenge.",
   "playSelectedGame": "PLAY",
   "musicGameTitle": "Music Maker",
-  "musicGameDescription": "Use one comfortable movement to play an instrument. We will choose and build the instrument in the next stage.",
+  "musicGameDescription": "Play Joybit's four-note trumpet with one comfortable movement.",
   "comingNext": "COMING NEXT",
   "donePlaying": "Done playing",
+  "musicGameHeading": "Play Joybit's trumpet",
+  "musicGameKeyboardInstruction": "Press PLAY A NOTE. On a computer, Space or Enter also works.",
+  "musicGameMotionInstruction": "Make one comfortable movement for each note, returning to rest between notes.",
+  "musicGameReady": "Ready for your first note",
+  "musicGameNotePlayed": "{note}!",
+  "@musicGameNotePlayed": {
+    "placeholders": {"note": {"type": "String"}}
+  },
+  "musicGameNotesPlayed": "{count, plural, =0{Notes played: 0} =1{Note played: 1} other{Notes played: {count}}}",
+  "@musicGameNotesPlayed": {
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "musicGameAction": "PLAY A NOTE",
+  "musicGameActionSemantics": "Play the next trumpet note",
+  "musicGameStatusSemantics": "Music Maker. {announcement}. {count, plural, =0{No notes played} =1{One note played} other{{count} notes played}}. {instruction}",
+  "@musicGameStatusSemantics": {
+    "placeholders": {
+      "announcement": {"type": "String"},
+      "count": {"type": "int"},
+      "instruction": {"type": "String"}
+    }
+  },
+  "musicGameMotionReadyInstruction": "Make your comfortable movement to play the next note.",
+  "musicGameResetTooltip": "Start the song again",
+  "musicGameSoundUnavailableTitle": "Sound unavailable",
+  "musicGameSoundUnavailableDescription": "The visual notes still work. Check the device volume and try again later.",
+  "musicNoteDo": "DO",
+  "musicNoteRe": "RE",
+  "musicNoteMi": "MI",
+  "musicNoteSol": "SOL",
   "gameTitle": "Sky Sprint",
   "gamePrimaryAction": "FLY",
   "gamePrimaryActionSemantics": "Make Joybit fly",

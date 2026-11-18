@@ -6,7 +6,7 @@ import 'package:material_ui/material_ui.dart';
 import '../test_support/localized_test_app.dart';
 
 void main() {
-  testWidgets('shows one playable game and one upcoming music game', (
+  testWidgets('opens both available games and returns to the cabinet', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -14,6 +14,8 @@ void main() {
         home: GameSelectionScreen(
           skySprintBuilder: (_) =>
               const Scaffold(body: Text('Injected Sky Sprint')),
+          musicMakerBuilder: (_) =>
+              const Scaffold(body: Text('Injected Music Maker')),
         ),
       ),
     );
@@ -21,7 +23,6 @@ void main() {
     expect(find.text('Choose a game'), findsOneWidget);
     expect(find.text('Sky Sprint'), findsOneWidget);
     expect(find.text('Music Maker'), findsOneWidget);
-    expect(find.text('COMING NEXT'), findsOneWidget);
     expect(
       tester
           .widget<FilledButton>(
@@ -31,7 +32,7 @@ void main() {
             ),
           )
           .onPressed,
-      isNull,
+      isNotNull,
     );
 
     await tester.tap(
@@ -46,6 +47,15 @@ void main() {
     Navigator.of(tester.element(find.text('Injected Sky Sprint'))).pop();
     await tester.pumpAndSettle();
     expect(find.text('Music Maker'), findsOneWidget);
+
+    await tester.tap(
+      find.descendant(
+        of: find.byKey(const Key('music-game-cartridge')),
+        matching: find.text('PLAY'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Injected Music Maker'), findsOneWidget);
   });
 
   testWidgets('shows live calibrated-control status', (tester) async {
@@ -90,7 +100,7 @@ void main() {
     expect(find.text('Elegir un juego'), findsOneWidget);
     expect(find.text('Carrera Celeste'), findsOneWidget);
     expect(find.text('Creador musical'), findsOneWidget);
-    expect(find.text('PRÓXIMO JUEGO'), findsOneWidget);
+    expect(find.text('JUGAR'), findsNWidgets(2));
     expect(tester.takeException(), isNull);
   });
 
